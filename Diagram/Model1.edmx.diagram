@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="3.0" xmlns:edmx="http://schemas.microsoft.com/ado/2009/11/edmx">
+ <!-- EF Designer content (DO NOT EDIT MANUALLY BELOW HERE) -->
+  <edmx:Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
+    <!-- Diagram content (shape and connector positions) -->
+    <edmx:Diagrams>
+      <Diagram DiagramId="2e03dde8a3a54a1ebf73cf018f969cfe" Name="Diagram1" ZoomLevel="88" >
+        <EntityTypeShape EntityType="Model1.User" Width="2" PointX="10.5" PointY="0.5" />
+        <EntityTypeShape EntityType="Model1.Person" Width="1.875" PointX="7.25" PointY="0.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="Model1.Module" Width="2" PointX="5" PointY="6.5" />
+        <EntityTypeShape EntityType="Model1.Form" Width="1.875" PointX="6.625" PointY="3.625" />
+        <EntityTypeShape EntityType="Model1.Rol" Width="1.875" PointX="12.75" PointY="3.75" IsExpanded="true" />
+        <AssociationConnector Association="Model1.RolUser" />
+        <EntityTypeShape EntityType="Model1.logs" Width="1.5" PointX="16.5" PointY="4.625" />
+        <EntityTypeShape EntityType="Model1.moduleForm" Width="1.5" PointX="8" PointY="7" />
+        <AssociationConnector Association="Model1.ModulemoduleForm" />
+        <AssociationConnector Association="Model1.moduleFormForm" />
+        <EntityTypeShape EntityType="Model1.rolPermiso" Width="1.5" PointX="12.875" PointY="7.25" />
+        <AssociationConnector Association="Model1.rolPermisoRol" ></AssociationConnector>
+        <EntityTypeShape EntityType="Model1.Permision" Width="1.5" PointX="10.375" PointY="6.625" />
+        <AssociationConnector Association="Model1.UserPerson" />
+        <EntityTypeShape EntityType="Model1.UserRol" Width="1.5" PointX="15.25" PointY="1.25" />
+        <AssociationConnector Association="Model1.UserRolUser" />
+        <AssociationConnector Association="Model1.UserRolRol" />
+        <EntityTypeShape EntityType="Model1.RolFormPermission" Width="1.5" PointX="10.125" PointY="4.125" />
+        <AssociationConnector Association="Model1.UserRolPersmisionPermision" />
+        <AssociationConnector Association="Model1.UserRolPersmisionForm" />
+        <AssociationConnector Association="Model1.UserRolPersmisionRol" />
+      </Diagram>
+    </edmx:Diagrams>
+  </edmx:Designer>
+</edmx:Edmx>
