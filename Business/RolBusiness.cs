@@ -24,19 +24,7 @@ namespace Business
             try
             {
                 var roles = await _rolData.GetRolsAsync();
-                var rolesDTO = new List<RolDto>();
-
-                foreach (var rol in roles)
-                {
-                    rolesDTO.Add(new RolDto
-                    {
-                        Id = rol.Id,
-                        Name = rol.Name,
-                        status = rol.Active // Si existe en la entidad
-                    });
-                }
-
-                return rolesDTO;
+                return MapToDTOList(roles); ;
             }
             catch (Exception ex)
             {
@@ -63,12 +51,7 @@ namespace Business
                     throw new EntityNotFoundException("Rol", id);
                 }
 
-                return new RolDto
-                {
-                    Id = rol.Id,
-                    Name = rol.Name,
-                    status = rol.Active
-                };
+                return MapToDTO(rol);
             }
             catch (Exception ex)
             {
@@ -84,20 +67,11 @@ namespace Business
             {
                 ValidateRol(RolDto);
 
-                var rol = new Rol
-                {
-                    Name = RolDto.Name,
-                    Active = RolDto.status // Si existe en la entidad
-                };
+                var rol = MapToEntity(RolDto);
 
                 var rolCreado = await _rolData.CreateAsync(rol);
 
-                return new RolDto
-                {
-                    Id = rolCreado.Id,
-                    Name = rolCreado.Name,
-                    status = rolCreado.Active // Si existe en la entidad
-                };
+                return MapToDTO(rolCreado);
             }
             catch (Exception ex)
             {
@@ -120,6 +94,7 @@ namespace Business
                 throw new Utilities.Exceptions.ValidationException("Name", "El Name del rol es obligatorio");
             }
         }
+
 
         // Método para mapear de Rol a RolDTO
         private RolDto MapToDTO(Rol rol)
@@ -153,8 +128,6 @@ namespace Business
             }
             return rolesDTO;
         }
-
-
 
     }
 }

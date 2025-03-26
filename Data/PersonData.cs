@@ -19,7 +19,7 @@ namespace Data
 
         public async Task<IEnumerable<Person>> GetPersonsAsync()
         {
-            string query = "SELECT * FROM data.Person";
+            string query = "SELECT * FROM data.Person"; // consulta por parametro
             return (IEnumerable<Person>)await _context.QueryAsync<IEnumerable<Person>>(query);
         }
 
@@ -52,7 +52,6 @@ namespace Data
                 throw;
             }
         }
-
 
         public async Task<bool> UpdateAsync(Person Person)
         {

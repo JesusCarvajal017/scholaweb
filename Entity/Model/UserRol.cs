@@ -4,17 +4,16 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Entity.DTOs
+namespace Entity.Model
 {
-    public class UserRolDto
+    public class UserRol
     {
-        //public int IdRolUser { get; set; }
-
+        public int Id { get; set; } 
         public int UserId { get; set; }
-        public string NameUser { get; set; }
-
         public int RolId { get; set; }
-        public string RolName { get; set; }
+
+        public User User { get; set; }
+        public User Rol { get; set; }
 
     }
 }

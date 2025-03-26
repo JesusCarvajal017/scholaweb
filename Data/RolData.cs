@@ -23,6 +23,9 @@ namespace Data
             return (IEnumerable<Rol>)await _context.QueryAsync<IEnumerable<Rol>>(query);
         }
 
+
+
+
         public async Task<Rol> GetRolAsync(int id)
         {
             try

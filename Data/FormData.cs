@@ -1,4 +1,5 @@
 ﻿
+using System.Security.Cryptography;
 using Entity.Contexts;
 using Entity.Model;
 using Microsoft.EntityFrameworkCore;
@@ -17,26 +18,43 @@ namespace Data
             _logger = logger;
         }
 
-        public async Task<IEnumerable<FormData>> GetFormsAsync()
+        public async Task<IEnumerable<Form>> GetAllAsync()
         {
-            string query = "SELECT * FROM data.Form";
-            return (IEnumerable<FormData>)await _context.QueryAsync<IEnumerable<FormData>>(query);
+            string query = @"
+                    SELECT fr.Id AS FormId, fr.Name AS FormName, 
+                           md.Id AS ModuleId, md.Name AS ModuleName
+                    FROM Form fr
+                    INNER JOIN Module md ON fr.ModuleId = md.Id
+                    WHERE fr.Id = @Id;";
+
+            return (IEnumerable<Form>)await _context.QueryAsync<IEnumerable<Form>>(query);
         }
 
-        public async Task<FormData> GetFormAsync(int id)
+        public async Task<IEnumerable<Form>> GetAllAsyncLinq()
         {
-            try
-            {
-
-                //return await _context.QueryAsync<IEnumerable<Form>>(query);
-                return await _context.Set<FormData>().FindAsync(id);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error al obtener Form con Id {FormId}", id);
-                throw;
-            }
+            return await _context.Set<Form>().ToListAsync();
         }
+
+        //public async Task<IEnumerable<Form>> GetFormsAsync()
+        //{
+        //    string query = "SELECT * FROM data.Form";
+        //    return (IEnumerable<Form>)await _context.QueryAsync<IEnumerable<Form>>(query);
+        //}
+
+        //public async Task<Form> GetFormAsync(int id)
+        //{
+        //    try
+        //    {
+
+        //        //return await _context.QueryAsync<IEnumerable<Form>>(query);
+        //        return await _context.Set<Form>().FindAsync(id);
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        _logger.LogError(ex, "Error al obtener Form con Id {FormId}", id);
+        //        throw;
+        //    }
+        //}
 
         public async Task<FormData> CreateAsync(FormData Form)
         {

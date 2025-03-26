@@ -17,19 +17,19 @@ namespace Data
             _logger = logger;
         }
 
-        public async Task<IEnumerable<ModuleData>> GetModulesAsync()
+        public async Task<IEnumerable<Module>> GetModulesAsync()
         {
             string query = "SELECT * FROM data.Module";
-            return (IEnumerable<ModuleData>)await _context.QueryAsync<IEnumerable<ModuleData>>(query);
+            return (IEnumerable<Module>)await _context.QueryAsync<IEnumerable<Module>>(query);
         }
 
-        public async Task<ModuleData> GetModuleAsync(int id)
+        public async Task<Module> GetModuleAsync(int id)
         {
             try
             {
 
                 //return await _context.QueryAsync<IEnumerable<Module>>(query);
-                return await _context.Set<ModuleData>().FindAsync(id);
+                return await _context.Set<Module>().FindAsync(id);
             }
             catch (Exception ex)
             {
@@ -38,11 +38,11 @@ namespace Data
             }
         }
 
-        public async Task<ModuleData> CreateAsync(ModuleData Module)
+        public async Task<Module> CreateAsync(Module Module)
         {
             try
             {
-                await _context.Set<ModuleData>().AddAsync(Module);
+                await _context.Set<Module>().AddAsync(Module);
                 await _context.SaveChangesAsync();
                 return Module;
             }
@@ -54,11 +54,11 @@ namespace Data
         }
 
 
-        public async Task<bool> UpdateAsync(ModuleData Module)
+        public async Task<bool> UpdateAsync(Module Module)
         {
             try
             {
-                _context.Set<ModuleData>().Update(Module);
+                _context.Set<Module>().Update(Module);
                 await _context.SaveChangesAsync();
                 return true;
             }
@@ -73,11 +73,11 @@ namespace Data
         {
             try
             {
-                var Module = await _context.Set<ModuleData>().FindAsync(id);
+                var Module = await _context.Set<Module>().FindAsync(id);
                 if (Module == null)
                     return false;
 
-                _context.Set<ModuleData>().Remove(Module);
+                _context.Set<Module>().Remove(Module);
                 await _context.SaveChangesAsync();
                 return true;
 

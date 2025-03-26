@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿
 using Data;
 using Entity.DTOs;
 using Entity.Model;
@@ -27,20 +23,8 @@ namespace Business
         {
             try
             {
-                var Persones = await _PersonData.GetPersonsAsync();
-                var PersonesDTO = new List<PersonDto>();
-
-                foreach (var Person in Persones)
-                {
-                    PersonesDTO.Add(new PersonDto
-                    {
-                        Id = Person.Id,
-                        Name = Person.Name,
-                        LastName = Person.LastName // Si existe en la entidad
-                    });
-                }
-
-                return PersonesDTO;
+                var Person = await _PersonData.GetPersonsAsync();
+                return MapToDTOList(Person); ;
             }
             catch (Exception ex)
             {
@@ -67,12 +51,7 @@ namespace Business
                     throw new EntityNotFoundException("Person", id);
                 }
 
-                return new PersonDto
-                {
-                    Id = Person.Id,
-                    Name = Person.Name,
-                    LastName = Person.LastName
-                };
+                return MapToDTO(Person);
             }
             catch (Exception ex)
             {
@@ -88,20 +67,11 @@ namespace Business
             {
                 ValidatePerson(PersonDto);
 
-                var Person = new Person
-                {
-                    Name = PersonDto.Name,
-                    LastName = PersonDto.LastName // Si existe en la entidad
-                };
+                var Person = MapToEntity(PersonDto);
 
                 var PersonCreado = await _PersonData.CreateAsync(Person);
 
-                return new PersonDto
-                {
-                    Id = PersonCreado.Id,
-                    Name = PersonCreado.Name,
-                    LastName = PersonCreado.LastName // Si existe en la entidad
-                };
+                return MapToDTO(PersonCreado);
             }
             catch (Exception ex)
             {
@@ -125,6 +95,7 @@ namespace Business
             }
         }
 
+
         // Método para mapear de Person a PersonDTO
         private PersonDto MapToDTO(Person Person)
         {
@@ -142,22 +113,21 @@ namespace Business
             return new Person
             {
                 Id = PersonDTO.Id,
-                Name = PersonDTO.Name,
+                Name= PersonDTO.Name,
                 LastName = PersonDTO.LastName // Si existe en la entidad
             };
         }
 
         // Método para mapear una lista de Person a una lista de PersonDTO
-        private IEnumerable<PersonDto> MapToDTOList(IEnumerable<Person> Persones)
+        private IEnumerable<PersonDto> MapToDTOList(IEnumerable<Person> Person)
         {
-            var PersonesDTO = new List<PersonDto>();
-            foreach (var Person in Persones)
+            var PersonDTO = new List<PersonDto>();
+            foreach (var Persons in Person)
             {
-                PersonesDTO.Add(MapToDTO(Person));
+                PersonDTO.Add(MapToDTO(Persons));
             }
-            return PersonesDTO;
+            return PersonDTO;
         }
-
 
     }
 }
