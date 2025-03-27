@@ -23,7 +23,7 @@ namespace Business
         {
             try
             {
-                var roles = await _rolData.GetRolsAsync();
+                var roles = await _rolData.GetAllAsync();
                 return MapToDTOList(roles); ;
             }
             catch (Exception ex)
@@ -32,6 +32,7 @@ namespace Business
                 throw new ExternalServiceException("Base de datos", "Error al recuperar la lista de roles", ex);
             }
         }
+
 
         // Método para obtener un rol por ID como DTO
         public async Task<RolDto> GetRolByIdAsync(int id)
@@ -44,7 +45,7 @@ namespace Business
 
             try
             {
-                var rol = await _rolData.GetRolAsync(id);
+                var rol = await _rolData.GetByIdAsync(id);
                 if (rol == null)
                 {
                     _logger.LogInformation("No se encontró ningún rol con ID: {RolId}", id);
@@ -77,6 +78,33 @@ namespace Business
             {
                 _logger.LogError(ex, "Error al crear nuevo rol: {RolNombre}", RolDto?.Name ?? "null");
                 throw new ExternalServiceException("Base de datos", "Error al crear el rol", ex);
+            }
+        }
+
+
+        public async Task<bool> DeleteRolAsync(int id)
+        {
+            if (id <= 0)
+            {
+                _logger.LogWarning("Id invalido {RolId}", id);
+                throw new Utilities.Exceptions.ValidationException("id", "El ID del rol debe ser mayor que cero");
+            }
+
+            try
+            {
+                var rol = await _rolData.GetByIdAsync(id);
+                if (rol == null)
+                {
+                    _logger.LogInformation("No se encontró ningún rol con ID: {RolId}", id);
+                    throw new EntityNotFoundException("Rol", id);
+                }
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error al obtener el rol con ID: {RolId}", id);
+                throw new ExternalServiceException("Base de datos", $"Error al recuperar el rol con ID {id}", ex);
             }
         }
 
