@@ -19,5 +19,9 @@ namespace Entity.Model
         public int Age { get; set; }
         public int Status { get; set; }
 
+
+        //relación con user 
+        public List<User> Users { get; set; } = new List<User>();
+
     }
 }

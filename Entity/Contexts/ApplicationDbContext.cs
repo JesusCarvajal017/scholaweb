@@ -5,6 +5,7 @@ using Microsoft.Extensions.Configuration;
 using System.Data;
 using System.Reflection;
 
+namespace Entity
 {
     public class ApplicationDbContext : DbContext
     {
@@ -67,6 +68,7 @@ using System.Reflection;
             var connection = this.Database.GetDbConnection();
             return await connection.QueryFirstOrDefaultAsync<T>(command.Definition);
         }
+
 
         //number afects 
         public async Task<int> ExecuteAsync(String text, object parametres = null, int? timeout = null, CommandType? type = null)

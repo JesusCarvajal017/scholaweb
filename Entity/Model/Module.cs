@@ -12,6 +12,8 @@ namespace Entity.Model
         public string Name { get; set; }
         public string Description { get; set; }
 
-        public string code { get; set; }
+        public string Code { get; set; }
+
+        public int Status { get; set; }
     }
 }

@@ -1,4 +1,5 @@
 ﻿
+using Entity;
 using Entity.Model;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -94,7 +95,7 @@ namespace Data
                 const string query = @"
                             INSERT INTO Person (Name, LastName, Email, Identification, Age, Status)
                             OUTPUT INSERTED.Id
-                            VALUES (@FirstName, @LastName, @Email, @Identification, @Age, @Status);";
+                            VALUES (@Name, @LastName, @Email, @Identification, @Age, @Status);";
 
                 var parameters = new
                 {
@@ -146,12 +147,12 @@ namespace Data
                 const string query = @"
                                     UPDATE Person
                                     SET
-                                        Name = @FirstName,
+                                        Name = @Name,
                                         LastName = @LastName,
-                                        Email = @DocumentType,
-                                        Identification = @Document,
-                                        Age = @DateBorn,
-                                        Status = @PhoneNumber,
+                                        Email = @Email,
+                                        Identification = @Identification,
+                                        Age = @Age,
+                                        Status = @Status,
                                     WHERE Id = @Id; ";
 
                 var parameters = new
@@ -243,7 +244,7 @@ namespace Data
             try
             {
                 const string query = @"UPDATE Person 
-                                        SET IsDeleted = 1 
+                                        SET Status = 1 
                                         WHERE Id = @Id";
                 var parameters = new { Id = id };
                 await _context.ExecuteAsync(query, parameters);
