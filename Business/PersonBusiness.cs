@@ -23,7 +23,7 @@ namespace Business
         {
             try
             {
-                var Person = await _PersonData.GetPersonsAsync();
+                var Person = await _PersonData.GetAllAsync();
                 return MapToDTOList(Person); ;
             }
             catch (Exception ex)
@@ -44,7 +44,7 @@ namespace Business
 
             try
             {
-                var Person = await _PersonData.GetPersonAsync(id);
+                var Person = await _PersonData.GetByIdAsync(id);
                 if (Person == null)
                 {
                     _logger.LogInformation("No se encontró ningún Person con ID: {PersonId}", id);

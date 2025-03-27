@@ -5,7 +5,6 @@ using Microsoft.Extensions.Configuration;
 using System.Data;
 using System.Reflection;
 
-namespace Entity.Contexts
 {
     public class ApplicationDbContext : DbContext
     {
@@ -24,7 +23,7 @@ namespace Entity.Contexts
             base.OnModelCreating(modelBuilder);
             modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
             
-            base.OnModelCreating(modelBuilder);
+            //base.OnModelCreating(modelBuilder);
         }
 
         // no es recomendado en producción
@@ -69,6 +68,23 @@ namespace Entity.Contexts
             return await connection.QueryFirstOrDefaultAsync<T>(command.Definition);
         }
 
+        //number afects 
+        public async Task<int> ExecuteAsync(String text, object parametres = null, int? timeout = null, CommandType? type = null)
+        {
+            using var command = new DapperEFCoreCommand(this, text, parametres, timeout, type, CancellationToken.None);
+            var connection = this.Database.GetDbConnection();
+            return await connection.ExecuteAsync(command.Definition);
+        }
+
+        public async Task<T> ExecuteScalarAsync<T>(string query, object parameters = null, int? timeout = null, CommandType? type = null)
+        {
+            using var command = new DapperEFCoreCommand(this, query, parameters, timeout, type, CancellationToken.None);
+            var connection = this.Database.GetDbConnection();
+            return await connection.ExecuteScalarAsync<T>(command.Definition);
+        }
+
+
+
         //Detecta cambios en entidades antes de guardar.
         private void EnsureAudit()
         {
@@ -94,6 +110,8 @@ namespace Entity.Contexts
                     cancellationToken: ct
                 );
             }
+
+           
 
             public CommandDefinition Definition { get; }
 

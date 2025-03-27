@@ -55,7 +55,7 @@ namespace Data
 
         public async Task<IEnumerable<UserRol>> GetAllLinQAsync()
         {
-            return await _context.Set<FormModule>()
+            return await _context.Set<UserRol>()
 
                 .Include(form => form.Form)
                 .Include(form => form.Module)

@@ -1,5 +1,4 @@
 ﻿
-using Entity.Contexts;
 using Entity.Model;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -9,81 +8,271 @@ namespace Data
     public class PersonData
     {
         private readonly ApplicationDbContext _context;
-        private readonly ILogger _logger;
-
+        private readonly ILogger logger;
         public PersonData(ApplicationDbContext context, ILogger logger)
         {
             _context = context;
-            _logger = logger;
+            this.logger = logger;
         }
 
-        public async Task<IEnumerable<Person>> GetPersonsAsync()
-        {
-            string query = "SELECT * FROM data.Person"; // consulta por parametro
-            return (IEnumerable<Person>)await _context.QueryAsync<IEnumerable<Person>>(query);
-        }
 
-        public async Task<Person> GetPersonAsync(int id)
+        //====================================== consultas por medio de SQL ====================================== 
+
+        //Método para obtener todos los Personas con SQL
+        public async Task<IEnumerable<Person>> GetAllAsync()
         {
             try
             {
+                const string query = "SELECT * FROM Person WHERE Status = 0;";
+                return await _context.QueryAsync<Person>(query);
+            }
+            catch (Exception ex)
+            {
+                logger.LogInformation(ex, "No se pudo obetner a las personas");
+                throw;
+            }
+        }
 
-                //return await _context.QueryAsync<IEnumerable<Person>>(query);
+
+        //Método para obtener por Id con SQL
+        public async Task<Person?> GetByIdAsync(int id)
+        {
+            try
+            {
+                const string query = "SELECT * FROM Person WHERE Id = @Id;";
+                var parameters = new { Id = id };
+                return await _context.QueryFirstOrDefaultAsync<Person>(query, parameters);
+
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, $"Error al traer una persona por id {id}");
+                throw;
+            }
+        }
+
+
+        //====================================== consultas por medio de LINQ ====================================== 
+
+        //Método para obtener todos los Personas con LINQ
+        public async Task<IEnumerable<Person>> GetAllAsyncLinq()
+        {
+            try
+            {
+                return await _context.Set<Person>()
+                .Where(p => p.Status == 0)
+                .ToListAsync();
+            }
+            catch (Exception ex)
+            {
+                logger.LogInformation(ex, "No se pudo obetner a las personas");
+                throw;
+            }
+        }
+
+
+        //Método para obtener por Id con LINQ
+        public async Task<Person?> GetByIdAsyncLinq(int id)
+        {
+            try
+            {
                 return await _context.Set<Person>().FindAsync(id);
+
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error al obtener Person con Id {PersonId}", id);
+                logger.LogError(ex, $"Error al traer una persona por id {id}");
                 throw;
             }
         }
 
-        public async Task<Person> CreateAsync(Person Person)
+        // ============================= Create Person SLQ =============================
+        public async Task<Person> CreateAsync(Person person)
         {
             try
             {
-                await _context.Set<Person>().AddAsync(Person);
+                const string query = @"
+                            INSERT INTO Person (Name, LastName, Email, Identification, Age, Status)
+                            OUTPUT INSERTED.Id
+                            VALUES (@FirstName, @LastName, @Email, @Identification, @Age, @Status);";
+
+                var parameters = new
+                {
+                    Name = person.Name,                        
+                    LastName = person.LastName,               
+                    Email = person.Email,                      
+                    Identification = person.Identification,        
+                    Age = person.Age,              
+                    Status = person.Status    
+                };
+
+                person.Id = await _context.ExecuteScalarAsync<int>(query, parameters);
+                person.Status = 0; // Establece el estado de la persona (activo e inactivo)
+                return person;
+
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, $"no se pudo agregar persona {person}");
+                throw;
+            }
+        }
+
+
+        // ============================= Create Person LINQ =============================
+        public async Task<Person> CreateAsyncLinq(Person person)
+        {
+            try
+            {
+                person.Status = 0; // Establece el estado de la persona (activo e inactivo)
+                await _context.Set<Person>().AddAsync(person);
                 await _context.SaveChangesAsync();
-                return Person;
+                return person;
+
             }
             catch (Exception ex)
             {
-                _logger.LogError($"Error al crer el Person");
+                logger.LogError(ex, $"no se pudo agregar persona {person}");
                 throw;
             }
         }
 
-        public async Task<bool> UpdateAsync(Person Person)
+
+        // ============================= Update Person sql==================
+        public async Task<bool> UpdateAsync(Person person)
         {
             try
             {
-                _context.Set<Person>().Update(Person);
+                const string query = @"
+                                    UPDATE Person
+                                    SET
+                                        Name = @FirstName,
+                                        LastName = @LastName,
+                                        Email = @DocumentType,
+                                        Identification = @Document,
+                                        Age = @DateBorn,
+                                        Status = @PhoneNumber,
+                                    WHERE Id = @Id; ";
+
+                var parameters = new
+                {
+                    Name = person.Name,
+                    LastName = person.LastName,
+                    Email = person.Email,
+                    Identification = person.Identification,
+                    Age = person.Age,
+                    Status = person.Status
+                };
+
+                int rowsAffected = await _context.ExecuteAsync(query, parameters);
+                return rowsAffected > 0;
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, $"No se pudo actualizar {person}");
+                throw;
+
+            }
+        }
+
+        // ============================= Update Person LINQ =========================
+        public async Task<bool> UpdateAsyncLinq(Person person)
+        {
+            try
+            {
+                _context.Set<Person>().Update(person);
                 await _context.SaveChangesAsync();
                 return true;
             }
             catch (Exception ex)
             {
-                _logger.LogError($"Error al actualizar el Person: {ex.Message}");
+                logger.LogError(ex, $"No se pudo actualizar {person}");
+                throw;
+
+            }
+        }
+
+
+        // ======================================================= Delte Persistent =======================================================
+
+        // ============================= Delte Person sql =========================
+        public async Task<bool> DeletePersistentAsync(int id)
+        {
+            try
+            {
+                const string query = @"DELETE FROM Person
+                                        WHERE Id = @Id";
+
+                var parameters = new { Id = id };
+                await _context.ExecuteAsync(query, parameters);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                logger.LogInformation($" error al eliminar {ex.Message}");
                 return false;
             }
         }
 
-        public async Task<bool> DeleteAsync(int id)
+        // ============================= Delte Person LINQ =========================
+        public async Task<bool> DeletePersistentAsyncLinq(int id)
         {
             try
             {
-                var Person = await _context.Set<Person>().FindAsync(id);
-                if (Person == null)
-                    return false;
+                var Delete = await _context.Set<Person>().FindAsync(id);
 
-                _context.Set<Person>().Remove(Person);
+                if (Delete == null) return false; // usuario inexistente
+
+                _context.Set<Person>().Remove(Delete);
                 await _context.SaveChangesAsync();
                 return true;
-
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error al eliminar el Person: {ex.Message}");
+                logger.LogInformation($" error al eliminar {ex.Message}");
+                return false;
+            }
+        }
+
+
+        // ======================================================= Delte Logical =======================================================
+
+        // ============================= Delte Person  =========================
+        public async Task<bool> DeleteLogicalAsync(int id)
+        {
+            try
+            {
+                const string query = @"UPDATE Person 
+                                        SET IsDeleted = 1 
+                                        WHERE Id = @Id";
+                var parameters = new { Id = id };
+                await _context.ExecuteAsync(query, parameters);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                logger.LogInformation($"Error al realizar delete lógico: {ex.Message}");
+                return false;
+            }
+        }
+
+
+        //Método para Eliminar lógico linq
+        public async Task<bool> DeleteLogicalAsyncLinq(int id)
+        {
+            try
+            {
+                var entity = await _context.Set<Person>().FindAsync(id);
+                if (entity == null) return false; // usuario inexistente
+
+                // Marcar como eliminado
+                entity.Status = 0;
+                await _context.SaveChangesAsync();
+                return true;
+            }
+            catch (Exception ex)
+            {
+                logger.LogInformation($"Error al realizar delete lógico con LINQ: {ex.Message}");
                 return false;
             }
         }
