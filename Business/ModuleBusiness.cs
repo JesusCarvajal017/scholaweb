@@ -23,7 +23,7 @@ namespace Business
         {
             try
             {
-                var Modules = await _ModuleData.GetModulesAsync();
+                var Modules = await _ModuleData.GetAllAsync();
                 return MapToDTOList(Modules); 
             }
             catch (Exception ex)
@@ -44,7 +44,7 @@ namespace Business
 
             try
             {
-                var Module = await _ModuleData.GetModuleAsync(id);
+                var Module = await _ModuleData.GetByIdAsync(id);
                 if (Module == null)
                 {
                     _logger.LogInformation("No se encontró ningún Module con ID: {ModuleId}", id);

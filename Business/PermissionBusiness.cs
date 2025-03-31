@@ -24,7 +24,7 @@ namespace Business
         {
             try
             {
-                var Permissiones = await _PermissionData.GetPermissionsAsync();
+                var Permissiones = await _PermissionData.GetAllAsync();
                 return MapToDTOList(Permissiones); ;
             }
             catch (Exception ex)
@@ -45,7 +45,7 @@ namespace Business
 
             try
             {
-                var Permission = await _PermissionData.GetPermissionAsync(id);
+                var Permission = await _PermissionData.GetByIdAsync(id);
                 if (Permission == null)
                 {
                     _logger.LogInformation("No se encontró ningún Permission con ID: {PermissionId}", id);

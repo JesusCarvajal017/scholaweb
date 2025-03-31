@@ -27,7 +27,7 @@ namespace Business
         {
             try
             {
-                var Forms = await _FormData.GetFormsAsync();
+                var Forms = await _FormData.GetAllAsync();
                 return MapToDTOList(Forms); ;
             }
             catch (Exception ex)
@@ -48,7 +48,7 @@ namespace Business
 
             try
             {
-                var Form = await _FormData.GetFormAsync(id);
+                var Form = await _FormData.GetByIdAsync(id);
                 if (Form == null)
                 {
                     _logger.LogInformation("No se encontró ningún Form con ID: {FormId}", id);

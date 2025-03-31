@@ -23,7 +23,7 @@ namespace Business
         {
             try
             {
-                var Useres = await _UserData.GetUsersAsync();
+                var Useres = await _UserData.GetAllAsync();
                 return MapToDTOList(Useres); ;
             }
             catch (Exception ex)
@@ -44,7 +44,7 @@ namespace Business
 
             try
             {
-                var User = await _UserData.GetUserAsync(id);
+                var User = await _UserData.GetByIdAsync(id);
                 if (User == null)
                 {
                     _logger.LogInformation("No se encontró ningún User con ID: {UserId}", id);
@@ -102,8 +102,7 @@ namespace Business
             return new UserDto
             {
                 Id = User.Id,
-                UserName = User.Name,
-                Email = User.Email // Si existe en la entidad
+                UserName = User.UserName,
             };
         }
 
@@ -113,8 +112,8 @@ namespace Business
             return new User
             {
                 Id = UserDTO.Id,
-                Name = UserDTO.UserName,
-                Email = UserDTO.Email // Si existe en la entidad
+                UserName = UserDTO.UserName,
+                Status = UserDTO.status
             };
         }
 

@@ -10,21 +10,21 @@ namespace Business
     public class RolBusiness
     {
         private readonly RolData _rolData;
-        private readonly ILogger _logger;
+        private readonly ILogger<RolBusiness> _logger;
 
-        public RolBusiness(RolData rolData, ILogger logger)
+        public RolBusiness(RolData rolData, ILogger<RolBusiness> logger)
         {
             _rolData = rolData;
             _logger = logger;
         }
 
-        // Método para obtener todos los roles como DTOs
+        // QUERY ALL
         public async Task<IEnumerable<RolDto>> GetAllRolesAsync()
         {
             try
             {
                 var roles = await _rolData.GetAllAsync();
-                return MapToDTOList(roles); ;
+                return MapToDTOList(roles);
             }
             catch (Exception ex)
             {
@@ -33,8 +33,7 @@ namespace Business
             }
         }
 
-
-        // Método para obtener un rol por ID como DTO
+        // QUERY BY ID
         public async Task<RolDto> GetRolByIdAsync(int id)
         {
             if (id <= 0)
@@ -45,7 +44,7 @@ namespace Business
 
             try
             {
-                var rol = await _rolData.GetByIdAsync(id);
+                var rol = await _rolData.GetByIdAsyncLinq(id);
                 if (rol == null)
                 {
                     _logger.LogInformation("No se encontró ningún rol con ID: {RolId}", id);
@@ -61,16 +60,14 @@ namespace Business
             }
         }
 
-        // Método para crear un rol desde un DTO
+        // INSERT ROL
         public async Task<RolDto> CreateRolAsync(RolDto RolDto)
         {
             try
             {
                 ValidateRol(RolDto);
-
                 var rol = MapToEntity(RolDto);
-
-                var rolCreado = await _rolData.CreateAsync(rol);
+                var rolCreado = await _rolData.CreateAsyncLinq(rol);
 
                 return MapToDTO(rolCreado);
             }
@@ -81,7 +78,34 @@ namespace Business
             }
         }
 
+        // UPDATE ROL
+        public async Task<bool> UpdateRolAsync(int id)
+        {
+            if (id <= 0)
+            {
+                _logger.LogWarning("Id invalido {RolId}", id);
+                throw new Utilities.Exceptions.ValidationException("id", "El ID del rol debe ser mayor que cero");
+            }
+            try
+            {
+                var rol = await _rolData.GetByIdAsync(id);
 
+                if (rol == null)
+                {
+                    _logger.LogInformation("No se encontró ningún rol con ID: {RolId}", id);
+                    throw new EntityNotFoundException("Rol", id);
+                }
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error al obtener el rol con ID: {RolId}", id);
+                throw new ExternalServiceException("Base de datos", $"Error al recuperar el rol con ID {id}", ex);
+            }
+        }
+
+        //DELETE ROL
         public async Task<bool> DeleteRolAsync(int id)
         {
             if (id <= 0)
@@ -108,7 +132,11 @@ namespace Business
             }
         }
 
-        // Método para validar el DTO
+        
+
+
+
+
         private void ValidateRol(RolDto RolDto)
         {
             if (RolDto == null)
@@ -131,6 +159,7 @@ namespace Business
             {
                 Id = rol.Id,
                 Name = rol.Name,
+                Code = rol.Code,
                 Description = rol.Description // Si existe en la entidad
             };
         }
@@ -140,9 +169,10 @@ namespace Business
         {
             return new Rol
             {
-                Id = rolDTO.Id,
                 Name= rolDTO.Name,
-                Description = rolDTO.Description // Si existe en la entidad
+                Code = rolDTO.Code,
+                Description = rolDTO.Description, // Si existe en la entidad
+                Status = rolDTO.status
             };
         }
 

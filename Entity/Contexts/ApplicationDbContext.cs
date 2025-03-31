@@ -1,14 +1,27 @@
 ﻿using Dapper;
+using Entity.Model;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.Configuration;
 using System.Data;
 using System.Reflection;
+using Module = Entity.Model.Module;
 
 namespace Entity
 {
     public class ApplicationDbContext : DbContext
     {
+        public DbSet<User> user { get; set; }
+        public DbSet<Form> form { get; set; }
+
+        public DbSet<Module> module { get; set; }
+
+        public DbSet<Permission> permission { get; set; }
+
+        public DbSet<Person> person { get; set; }
+
+        public DbSet<Rol> rol { get; set; }
+
         protected readonly IConfiguration _configuration;
 
         //configurar opciones del contexto(como el proveedor de base de datos).
@@ -22,8 +35,9 @@ namespace Entity
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
-            modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
-            
+
+            //modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
+
             //base.OnModelCreating(modelBuilder);
         }
 
@@ -31,8 +45,17 @@ namespace Entity
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             optionsBuilder.EnableSensitiveDataLogging();
-    
+
+            if (!optionsBuilder.IsConfigured)
+            {
+                var connectionString = _configuration.GetConnectionString("DefaultConnection");
+
+                optionsBuilder.UseNpgsql(connectionString, b =>
+                    b.MigrationsAssembly("Web")); 
+            }
+
         }
+
 
         //cofiguracion de conversiones
         protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
@@ -59,6 +82,7 @@ namespace Entity
             using var command = new DapperEFCoreCommand(this, text, parameters, timeout, type, CancellationToken.None);
             var connection = this.Database.GetDbConnection();
             return await connection.QueryAsync<T>(command.Definition);
+            
         }
 
         
@@ -70,7 +94,7 @@ namespace Entity
         }
 
 
-        //number afects 
+        //insert, update y delete => devuele el número de filas afectadas.
         public async Task<int> ExecuteAsync(String text, object parametres = null, int? timeout = null, CommandType? type = null)
         {
             using var command = new DapperEFCoreCommand(this, text, parametres, timeout, type, CancellationToken.None);
@@ -84,8 +108,6 @@ namespace Entity
             var connection = this.Database.GetDbConnection();
             return await connection.ExecuteScalarAsync<T>(command.Definition);
         }
-
-
 
         //Detecta cambios en entidades antes de guardar.
         private void EnsureAudit()

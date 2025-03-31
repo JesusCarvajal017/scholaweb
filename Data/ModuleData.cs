@@ -24,7 +24,7 @@ namespace Data
         {
             try
             {
-                const string query = "SELECT * FROM Module WHERE Status = 0;";
+                const string query = @"SELECT * FROM Module WHERE ""Status"" = 0;";
                 return await _context.QueryAsync<Module>(query);
             }
             catch (Exception ex)
@@ -78,7 +78,6 @@ namespace Data
             try
             {
                 return await _context.Set<Module>().FindAsync(id);
-
             }
             catch (Exception ex)
             {
@@ -92,10 +91,12 @@ namespace Data
         {
             try
             {
+               
+
                 const string query = @"
-                            INSERT INTO Module (Name, Description, Code, Status)
-                            OUTPUT INSERTED.Id
-                            VALUES (@Name, @Description, @code, @Status);";
+                                        INSERT INTO Module (""Name"", ""Code"", ""Description"", ""Status"")
+                                        OUTPUT INSERTED.Id
+                                        VALUES (@Name, @Code, @Description, @Status);";
 
                 var parameters = new
                 {
