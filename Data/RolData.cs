@@ -15,8 +15,6 @@ namespace Data
             this._logger = logger;
         }
 
-
-
         //======================================______________  SQL  ______________====================================== 
 
         // SELECT ALL
@@ -58,20 +56,20 @@ namespace Data
             try
             {
                 const string query = @"
-                            INSERT INTO Rol (""Name"", ""Code"", ""Description"", ""Status"")
-                                VALUES (@Name, @Code, @Description, @Status)
+                            INSERT INTO Rol (""Name"", ""Description"", ""Status"")
+                                VALUES (@Name, @Description, @Status)
                             RETURNING ""Id"";";
 
                 var parameters = new
                 {
                     Name = Rol.Name,
-                    Code = Rol.Code,
                     Description = Rol.Description,
-                    Status = Rol.Status
+                    Status = 1
                 };
 
                 Rol.Id = await _context.ExecuteScalarAsync<int>(query, parameters);
                 Rol.Status = 1;
+
                 return Rol;
 
             }
@@ -91,17 +89,14 @@ namespace Data
                                     UPDATE Rol
                                     SET
                                         ""Name"" = @Name,
-                                        ""Code"" = @Code,
-                                        ""Description"" = @Description,
-                                        ""Status"" = @Status
+                                        ""Description"" = @Description
                                     WHERE ""Id"" = @Id; ";
 
                 var parameters = new
                 {
+                    Id = Rol.Id,
                     Name = Rol.Name,
-                    Code = Rol.Code,
                     Description = Rol.Description,
-                    Status = Rol.Status
                 };
 
                 int rowsAffected = await _context.ExecuteAsync(query, parameters);
@@ -116,15 +111,15 @@ namespace Data
         }
 
         // DELETE PERSISTENT
-        public async Task<bool> DeletePersistentAsync(int id)
+        public async Task<Object> DeletePersistentAsync(int id)
         {
             try
             {
                 const string query = @"DELETE FROM Rol
-                                        WHERE Id = @Id";
+                                        WHERE ""Id"" = @Id";
                 var parameters = new { Id = id };
-                await _context.ExecuteAsync(query, parameters);
-                return true;
+                var delete = await _context.ExecuteAsync(query, parameters);
+                return new { rowAfefects = delete };
             }
             catch (Exception ex)
             {
@@ -134,16 +129,17 @@ namespace Data
         }
 
         // DELETE LOGICAL
-        public async Task<bool> DeleteLogicalAsync(int id)
+        public async Task<Object> DeleteLogicalAsync(int id)
         {
             try
             {
                 const string query = @"UPDATE Rol 
-                                        SET IsDeleted = 1 
-                                        WHERE Id = @Id";
+                                        SET ""Status"" = 0 
+                                        WHERE ""Id"" = @Id";
                 var parameters = new { Id = id };
-                await _context.ExecuteAsync(query, parameters);
-                return true;
+                var deleteLogical = await _context.ExecuteAsync(query, parameters);
+                return new { rowAfectes = deleteLogical };
+  
             }
             catch (Exception ex)
             {
@@ -161,7 +157,7 @@ namespace Data
             try
             {
                 return await _context.Set<Rol>()
-                .Where(p => p.Status == 0)
+                .Where(p => p.Status == 1)
                 .ToListAsync();
             }
             catch (Exception ex)

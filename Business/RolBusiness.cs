@@ -1,5 +1,4 @@
-﻿
-using Data;
+﻿using Data;
 using Entity.DTOs;
 using Entity.Model;
 using Microsoft.Extensions.Logging;
@@ -23,7 +22,7 @@ namespace Business
         {
             try
             {
-                var roles = await _rolData.GetAllAsync();
+                var roles = await _rolData.GetAllAsyncLinq();
                 return MapToDTOList(roles);
             }
             catch (Exception ex)
@@ -67,7 +66,7 @@ namespace Business
             {
                 ValidateRol(RolDto);
                 var rol = MapToEntity(RolDto);
-                var rolCreado = await _rolData.CreateAsyncLinq(rol);
+                var rolCreado = await _rolData.CreateAsync(rol);
 
                 return MapToDTO(rolCreado);
             }
@@ -79,34 +78,29 @@ namespace Business
         }
 
         // UPDATE ROL
-        public async Task<bool> UpdateRolAsync(int id)
+        public async Task<Object> UpdateRolAsync(RolDto rolDto)
         {
-            if (id <= 0)
-            {
-                _logger.LogWarning("Id invalido {RolId}", id);
-                throw new Utilities.Exceptions.ValidationException("id", "El ID del rol debe ser mayor que cero");
-            }
             try
             {
-                var rol = await _rolData.GetByIdAsync(id);
 
-                if (rol == null)
-                {
-                    _logger.LogInformation("No se encontró ningún rol con ID: {RolId}", id);
-                    throw new EntityNotFoundException("Rol", id);
-                }
+                ValidateRol(rolDto);
+                int id = rolDto.Id;
+                var rolValid = await _rolData.GetByIdAsync(id);
 
-                return true;
+                var rol = MapToEntity(rolDto);
+                var updateRol = await _rolData.UpdateAsync(rol);
+
+                return new { status = updateRol };
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error al obtener el rol con ID: {RolId}", id);
-                throw new ExternalServiceException("Base de datos", $"Error al recuperar el rol con ID {id}", ex);
+                _logger.LogError(ex, "Error al obtener el rol con ID: {RolId}", rolDto.Id);
+                throw new ExternalServiceException("Base de datos", $"Error al recuperar el rol con ID {rolDto.Id}", ex);
             }
         }
 
-        //DELETE ROL
-        public async Task<bool> DeleteRolAsync(int id)
+        //DELETE ROL => LOGICAL
+        public async Task<Object> DeletelogicaRollAsync(int id)
         {
             if (id <= 0)
             {
@@ -116,14 +110,14 @@ namespace Business
 
             try
             {
-                var rol = await _rolData.GetByIdAsync(id);
+                var rol = await _rolData.DeleteLogicalAsync(id);
                 if (rol == null)
                 {
                     _logger.LogInformation("No se encontró ningún rol con ID: {RolId}", id);
                     throw new EntityNotFoundException("Rol", id);
                 }
 
-                return true;
+                return rol;
             }
             catch (Exception ex)
             {
@@ -131,11 +125,31 @@ namespace Business
                 throw new ExternalServiceException("Base de datos", $"Error al recuperar el rol con ID {id}", ex);
             }
         }
+        public async Task<Object> DeletePersistenRolAsync(int id)
+        {
+            if (id <= 0)
+            {
+                _logger.LogWarning("Id invalido {RolId}", id);
+                throw new Utilities.Exceptions.ValidationException("id", "El ID del rol debe ser mayor que cero");
+            }
 
-        
+            try
+            {
+                var rol = await _rolData.DeletePersistentAsync(id);
+                if (rol == null)
+                {
+                    _logger.LogInformation("No se encontró ningún rol con ID: {RolId}", id);
+                    throw new EntityNotFoundException("Rol", id);
+                }
 
-
-
+                return rol;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error al obtener el rol con ID: {RolId}", id);
+                throw new ExternalServiceException("Base de datos", $"Error al recuperar el rol con ID {id}", ex);
+            }
+        }
 
         private void ValidateRol(RolDto RolDto)
         {
@@ -151,7 +165,6 @@ namespace Business
             }
         }
 
-
         // Método para mapear de Rol a RolDTO
         private RolDto MapToDTO(Rol rol)
         {
@@ -159,8 +172,8 @@ namespace Business
             {
                 Id = rol.Id,
                 Name = rol.Name,
-                Code = rol.Code,
-                Description = rol.Description // Si existe en la entidad
+                Description = rol.Description,
+                Status = rol.Status
             };
         }
 
@@ -169,10 +182,9 @@ namespace Business
         {
             return new Rol
             {
-                Name= rolDTO.Name,
-                Code = rolDTO.Code,
-                Description = rolDTO.Description, // Si existe en la entidad
-                Status = rolDTO.status
+                Id = rolDTO.Id,
+                Name = rolDTO.Name,
+                Description = rolDTO.Description, 
             };
         }
 

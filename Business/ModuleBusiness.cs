@@ -10,9 +10,9 @@ namespace Business
     {
 
         private readonly ModuleData _ModuleData;
-        private readonly ILogger _logger;
+        private readonly ILogger<ModuleBusiness> _logger;
 
-        public ModuleBusiness(ModuleData ModuleData, ILogger logger)
+        public ModuleBusiness(ModuleData ModuleData, ILogger<ModuleBusiness> logger)
         {
             _ModuleData = ModuleData;
             _logger = logger;
@@ -80,6 +80,87 @@ namespace Business
             }
         }
 
+
+
+        // UPDATE Module
+        public async Task<Object> UpdateModuleAsync(ModuleDto ModuleDto)
+        {
+            try
+            {
+
+                ValidateModule(ModuleDto);
+                int id = ModuleDto.Id;
+                var ModuleValid = await _ModuleData.GetByIdAsync(id);
+
+                var Module = MapToEntity(ModuleDto);
+                var updateModule = await _ModuleData.UpdateAsync(Module);
+
+                return new { status = updateModule };
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error al obtener el Module con ID: {ModuleId}", ModuleDto.Id);
+                throw new ExternalServiceException("Base de datos", $"Error al recuperar el Module con ID {ModuleDto.Id}", ex);
+            }
+        }
+
+        //DELETE Module => LOGICAL
+        public async Task<Object> DeletelogicaModulelAsync(int id)
+        {
+            if (id <= 0)
+            {
+                _logger.LogWarning("Id invalido {ModuleId}", id);
+                throw new Utilities.Exceptions.ValidationException("id", "El ID del Module debe ser mayor que cero");
+            }
+
+            try
+            {
+                var Module = await _ModuleData.DeleteLogicalAsync(id);
+                if (Module == null)
+                {
+                    _logger.LogInformation("No se encontró ningún Module con ID: {ModuleId}", id);
+                    throw new EntityNotFoundException("Module", id);
+                }
+
+                return Module;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error al obtener el Module con ID: {ModuleId}", id);
+                throw new ExternalServiceException("Base de datos", $"Error al recuperar el Module con ID {id}", ex);
+            }
+        }
+
+        // DELETE PERSISTENT
+        public async Task<Object> DeletePersistenModuleAsync(int id)
+        {
+            if (id <= 0)
+            {
+                _logger.LogWarning("Id invalido {ModuleId}", id);
+                throw new Utilities.Exceptions.ValidationException("id", "El ID del Module debe ser mayor que cero");
+            }
+
+            try
+            {
+                var Module = await _ModuleData.DeletePersistentAsync(id);
+                if (Module == null)
+                {
+                    _logger.LogInformation("No se encontró ningún Module con ID: {ModuleId}", id);
+                    throw new EntityNotFoundException("Module", id);
+                }
+
+                return Module;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error al obtener el Module con ID: {ModuleId}", id);
+                throw new ExternalServiceException("Base de datos", $"Error al recuperar el Module con ID {id}", ex);
+            }
+        }
+
+
+
+
         // Método para validar el DTO
         private void ValidateModule(ModuleDto ModuleDto)
         {
@@ -103,7 +184,8 @@ namespace Business
             {
                 Id = Module.Id,
                 Name = Module.Name,
-                Description = Module.Description // Si existe en la entidad
+                Description = Module.Description,
+                Status = Module.Status
             };
         }
 
@@ -114,7 +196,8 @@ namespace Business
             {
                 Id = ModuleDTO.Id,
                 Name = ModuleDTO.Name,
-                Description = ModuleDTO.Description // Si existe en la entidad
+                Description = ModuleDTO.Description,
+                Status = ModuleDTO.Status
             };
         }
 

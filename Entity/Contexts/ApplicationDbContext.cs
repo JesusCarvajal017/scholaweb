@@ -5,55 +5,40 @@ using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.Configuration;
 using System.Data;
 using System.Reflection;
-using Module = Entity.Model.Module;
 
 namespace Entity
 {
     public class ApplicationDbContext : DbContext
     {
-        public DbSet<User> user { get; set; }
-        public DbSet<Form> form { get; set; }
-
-        public DbSet<Module> module { get; set; }
-
-        public DbSet<Permission> permission { get; set; }
-
-        public DbSet<Person> person { get; set; }
-
+        public DbSet<Person> Person { get; set; }
         public DbSet<Rol> rol { get; set; }
-
-        protected readonly IConfiguration _configuration;
-
+        public DbSet<Form> form { get; set; }
+        public DbSet<Permission> permission { get; set; }
+        public DbSet<User> user { get; set; }
+        public DbSet<UserRol> userRol { get; set; }
+        public DbSet<ModuleForm> ModuleForm  { get; set; }
+        public DbSet<RolFormPermission> RolFormPermission { get; set; }
+     
+        protected readonly IConfiguration? _configuration;
+      
         //configurar opciones del contexto(como el proveedor de base de datos).
-        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options, IConfiguration configuration)
+        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options, IConfiguration configuration = null )
         : base(options)
         {
             _configuration = configuration;
         }
-
+        //<sumary>
         //configuraciones de las entidades automaticas
+        //</sumary>
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
-
-            //modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
-
-            //base.OnModelCreating(modelBuilder);
         }
 
         // no es recomendado en producción
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             optionsBuilder.EnableSensitiveDataLogging();
-
-            if (!optionsBuilder.IsConfigured)
-            {
-                var connectionString = _configuration.GetConnectionString("DefaultConnection");
-
-                optionsBuilder.UseNpgsql(connectionString, b =>
-                    b.MigrationsAssembly("Web")); 
-            }
-
         }
 
 
@@ -134,8 +119,6 @@ namespace Entity
                     cancellationToken: ct
                 );
             }
-
-           
 
             public CommandDefinition Definition { get; }
 

@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Data;
+﻿using Data;
 using Entity.DTOs;
 using Entity.Model;
 using Microsoft.Extensions.Logging;
@@ -14,9 +9,9 @@ namespace Business
     public class FormBusiness
     {
         private readonly FormData _FormData;
-        private readonly ILogger _logger;
+        private readonly ILogger<FormBusiness> _logger;
 
-        public FormBusiness(FormData FormData, ILogger logger)
+        public FormBusiness(FormData FormData, ILogger<FormBusiness> logger)
         {
             _FormData = FormData;
             _logger = logger;
@@ -27,7 +22,7 @@ namespace Business
         {
             try
             {
-                var Forms = await _FormData.GetAllAsync();
+                var Forms = await _FormData.GetAllAsyncLinq();
                 return MapToDTOList(Forms); ;
             }
             catch (Exception ex)
@@ -38,7 +33,7 @@ namespace Business
         }
 
         // Método para obtener un Form por ID como DTO
-        public async Task<FormDto> GetFormByIdAsync(int id)
+        public async Task<FormDto> GetByIdFormAsync(int id)
         {
             if (id <= 0)
             {
@@ -84,6 +79,86 @@ namespace Business
             }
         }
 
+
+
+        // UPDATE Form
+        public async Task<Object> UpdateFormAsync(FormDto FormDto)
+        {
+            try
+            {
+                ValidateForm(FormDto);
+                int id = FormDto.Id;
+                var FormValid = await _FormData.GetByIdAsync(id);
+
+                var Form = MapToEntity(FormDto);
+                var updateForm = await _FormData.UpdateAsync(Form);
+
+                return new { status = updateForm };
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error al obtener el Form con ID: {FormId}", FormDto.Id);
+                throw new ExternalServiceException("Base de datos", $"Error al recuperar el Form con ID {FormDto.Id}", ex);
+            }
+        }
+
+        //DELETE Form => LOGICAL
+        public async Task<Object> DeletelogicaFormlAsync(int id)
+        {
+            if (id <= 0)
+            {
+                _logger.LogWarning("Id invalido {FormId}", id);
+                throw new Utilities.Exceptions.ValidationException("id", "El ID del Form debe ser mayor que cero");
+            }
+
+            try
+            {
+                var Form = await _FormData.DeleteLogicalAsync(id);
+                if (Form == null)
+                {
+                    _logger.LogInformation("No se encontró ningún Form con ID: {FormId}", id);
+                    throw new EntityNotFoundException("Form", id);
+                }
+
+                return Form;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error al obtener el Form con ID: {FormId}", id);
+                throw new ExternalServiceException("Base de datos", $"Error al recuperar el Form con ID {id}", ex);
+            }
+        }
+
+        // DELETE PERSISTENT
+        public async Task<Object> DeletePersistenFormAsync(int id)
+        {
+            if (id <= 0)
+            {
+                _logger.LogWarning("Id invalido {FormId}", id);
+                throw new Utilities.Exceptions.ValidationException("id", "El ID del Form debe ser mayor que cero");
+            }
+
+            try
+            {
+                var Form = await _FormData.DeletePersistentAsync(id);
+                if (Form == null)
+                {
+                    _logger.LogInformation("No se encontró ningún Form con ID: {FormId}", id);
+                    throw new EntityNotFoundException("Form", id);
+                }
+
+                return Form;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error al obtener el Form con ID: {FormId}", id);
+                throw new ExternalServiceException("Base de datos", $"Error al recuperar el Form con ID {id}", ex);
+            }
+        }
+
+
+
+
         // Método para validar el DTO
         private void ValidateForm(FormDto FormDto)
         {
@@ -107,7 +182,8 @@ namespace Business
             {
                 Id = Form.Id,
                 Name = Form.Name,
-                Description = Form.Description // Si existe en la entidad
+                Description = Form.Description,
+                Status = Form.Status
             };
         }
 
@@ -118,7 +194,8 @@ namespace Business
             {
                 Id = FormDTO.Id,
                 Name = FormDTO.Name,
-                Description = FormDTO.Description // Si existe en la entidad
+                Description = FormDTO.Description,
+                Status = FormDTO.Status 
             };
         }
 

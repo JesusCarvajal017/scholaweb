@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Entity.Model;
 
 namespace Entity.DTOs
 {
@@ -10,9 +11,8 @@ namespace Entity.DTOs
     {
         public int Id { get; set; }
         public string UserName { get; set; }
-
-        public string Email { get; set; }
-
-        public int status { get; set; }
+        public string Pass { get; set; }
+        public int Status { get; set; }
+        public int PersonId { get; set; }
     }
 }

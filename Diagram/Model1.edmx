@@ -4,11 +4,256 @@
   <edmx:Runtime>
     <!-- SSDL content -->
     <edmx:StorageModels>
-      <Schema xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl" Namespace="Model1.Store" Alias="Self" Provider="System.Data.SqlClient" ProviderManifestToken="2005">
-        <EntityContainer Name="Model1TargetContainer" >
-        </EntityContainer>
-      </Schema>
-    </edmx:StorageModels>
+    <Schema Namespace="Model1.Store" Alias="Self" Provider="System.Data.SqlClient" ProviderManifestToken="2012" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
+  <EntityContainer Name="Model1StoreContainer">
+    <EntitySet Name="UserSet" EntityType="Model1.Store.UserSet" store:Type="Tables" Schema="dbo" />
+    <EntitySet Name="PersonSet" EntityType="Model1.Store.PersonSet" store:Type="Tables" Schema="dbo" />
+    <EntitySet Name="ModuleSet" EntityType="Model1.Store.ModuleSet" store:Type="Tables" Schema="dbo" />
+    <EntitySet Name="FormSet" EntityType="Model1.Store.FormSet" store:Type="Tables" Schema="dbo" />
+    <EntitySet Name="RolSet" EntityType="Model1.Store.RolSet" store:Type="Tables" Schema="dbo" />
+    <EntitySet Name="PermisosSet" EntityType="Model1.Store.PermisosSet" store:Type="Tables" Schema="dbo" />
+    <EntitySet Name="moduleFormSet" EntityType="Model1.Store.moduleFormSet" store:Type="Tables" Schema="dbo" />
+    <EntitySet Name="PermisionSet" EntityType="Model1.Store.PermisionSet" store:Type="Tables" Schema="dbo" />
+    <EntitySet Name="UserRolSet" EntityType="Model1.Store.UserRolSet" store:Type="Tables" Schema="dbo" />
+    <EntitySet Name="RolFormPermissionSet" EntityType="Model1.Store.RolFormPermissionSet" store:Type="Tables" Schema="dbo" />
+    <AssociationSet Name="UserRolPersmisionPermisos" Association="Model1.Store.UserRolPersmisionPermisos">
+      <End Role="UserRolPersmision" EntitySet="RolFormPermissionSet" />
+      <End Role="Permisos" EntitySet="PermisosSet" />
+    </AssociationSet>
+    <AssociationSet Name="UserPerson" Association="Model1.Store.UserPerson">
+      <End Role="User" EntitySet="UserSet" />
+      <End Role="Person" EntitySet="PersonSet" />
+    </AssociationSet>
+    <AssociationSet Name="UserRolUser" Association="Model1.Store.UserRolUser">
+      <End Role="UserRol" EntitySet="UserRolSet" />
+      <End Role="User" EntitySet="UserSet" />
+    </AssociationSet>
+    <AssociationSet Name="UserRolRol" Association="Model1.Store.UserRolRol">
+      <End Role="UserRol" EntitySet="UserRolSet" />
+      <End Role="Rol" EntitySet="RolSet" />
+    </AssociationSet>
+    <AssociationSet Name="moduleFormForm" Association="Model1.Store.moduleFormForm">
+      <End Role="moduleForm" EntitySet="moduleFormSet" />
+      <End Role="Form" EntitySet="FormSet" />
+    </AssociationSet>
+    <AssociationSet Name="moduleFormModule" Association="Model1.Store.moduleFormModule">
+      <End Role="moduleForm" EntitySet="moduleFormSet" />
+      <End Role="Module" EntitySet="ModuleSet" />
+    </AssociationSet>
+    <AssociationSet Name="RolFormPermissionForm" Association="Model1.Store.RolFormPermissionForm">
+      <End Role="RolFormPermission" EntitySet="RolFormPermissionSet" />
+      <End Role="Form" EntitySet="FormSet" />
+    </AssociationSet>
+    <AssociationSet Name="RolFormPermissionRol" Association="Model1.Store.RolFormPermissionRol">
+      <End Role="RolFormPermission" EntitySet="RolFormPermissionSet" />
+      <End Role="Rol" EntitySet="RolSet" />
+    </AssociationSet>
+    <AssociationSet Name="RolFormPermissionPermision" Association="Model1.Store.RolFormPermissionPermision">
+      <End Role="RolFormPermission" EntitySet="RolFormPermissionSet" />
+      <End Role="Permision" EntitySet="PermisionSet" />
+    </AssociationSet>
+  </EntityContainer>
+  <EntityType Name="UserSet">
+    <Key>
+      <PropertyRef Name="Id" />
+    </Key>
+    <Property Name="Id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+    <Property Name="UserName" Type="nvarchar(max)" Nullable="false" />
+    <Property Name="Password" Type="nvarchar(max)" Nullable="false" />
+    <Property Name="State" Type="nvarchar(max)" Nullable="false" />
+    <Property Name="UserRolId" Type="int" Nullable="false" />
+    <Property Name="UserRolId1" Type="int" Nullable="false" />
+  </EntityType>
+  <EntityType Name="PersonSet">
+    <Key>
+      <PropertyRef Name="Id" />
+    </Key>
+    <Property Name="Id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+    <Property Name="Name" Type="nvarchar(max)" Nullable="false" />
+    <Property Name="LastName" Type="nvarchar(max)" Nullable="false" />
+    <Property Name="Email" Type="nvarchar(max)" Nullable="false" />
+    <Property Name="Identification" Type="nvarchar(max)" Nullable="false" />
+    <Property Name="Age" Type="nvarchar(max)" Nullable="false" />
+    <Property Name="Status" Type="nvarchar(max)" Nullable="false" />
+    <Property Name="UserId" Type="int" Nullable="false" />
+  </EntityType>
+  <EntityType Name="ModuleSet">
+    <Key>
+      <PropertyRef Name="Id" />
+    </Key>
+    <Property Name="Id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+    <Property Name="Name" Type="nvarchar(max)" Nullable="false" />
+    <Property Name="Descripcion" Type="nvarchar(max)" Nullable="false" />
+    <Property Name="Code" Type="nvarchar(max)" Nullable="false" />
+  </EntityType>
+  <EntityType Name="FormSet">
+    <Key>
+      <PropertyRef Name="Id" />
+    </Key>
+    <Property Name="Id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+    <Property Name="Name" Type="nvarchar(max)" Nullable="false" />
+    <Property Name="Description" Type="nvarchar(max)" Nullable="false" />
+  </EntityType>
+  <EntityType Name="RolSet">
+    <Key>
+      <PropertyRef Name="Id" />
+    </Key>
+    <Property Name="Id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+    <Property Name="Name" Type="nvarchar(max)" Nullable="false" />
+    <Property Name="Active" Type="nvarchar(max)" Nullable="false" />
+    <Property Name="Description" Type="nvarchar(max)" Nullable="false" />
+  </EntityType>
+  <EntityType Name="PermisosSet">
+    <Key>
+      <PropertyRef Name="Id" />
+    </Key>
+    <Property Name="Id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+    <Property Name="Action" Type="nvarchar(max)" Nullable="false" />
+    <Property Name="Description" Type="nvarchar(max)" Nullable="false" />
+  </EntityType>
+  <EntityType Name="moduleFormSet">
+    <Key>
+      <PropertyRef Name="Id" />
+    </Key>
+    <Property Name="Id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+    <Property Name="Form_Id" Type="int" Nullable="false" />
+    <Property Name="Module_Id" Type="int" Nullable="false" />
+  </EntityType>
+  <EntityType Name="PermisionSet">
+    <Key>
+      <PropertyRef Name="Id" />
+    </Key>
+    <Property Name="Id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+    <Property Name="Name" Type="nvarchar(max)" Nullable="false" />
+    <Property Name="Descripcion" Type="nvarchar(max)" Nullable="false" />
+  </EntityType>
+  <EntityType Name="UserRolSet">
+    <Key>
+      <PropertyRef Name="Id" />
+    </Key>
+    <Property Name="Id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+    <Property Name="User_Id" Type="int" Nullable="false" />
+    <Property Name="Rol_Id" Type="int" Nullable="false" />
+  </EntityType>
+  <EntityType Name="RolFormPermissionSet">
+    <Key>
+      <PropertyRef Name="Id" />
+    </Key>
+    <Property Name="Id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+    <Property Name="UserRolPersmisionPermisos_UserRolPersmision_Id" Type="int" Nullable="false" />
+    <Property Name="Form_Id" Type="int" Nullable="false" />
+    <Property Name="Rol_Id" Type="int" Nullable="false" />
+    <Property Name="Permision_Id" Type="int" Nullable="false" />
+  </EntityType>
+  <Association Name="UserRolPersmisionPermisos">
+    <End Role="UserRolPersmision" Type="Model1.Store.RolFormPermissionSet" Multiplicity="*" />
+    <End Role="Permisos" Type="Model1.Store.PermisosSet" Multiplicity="1" />
+    <ReferentialConstraint>
+      <Principal Role="Permisos">
+        <PropertyRef Name="Id" />
+      </Principal>
+      <Dependent Role="UserRolPersmision">
+        <PropertyRef Name="UserRolPersmisionPermisos_UserRolPersmision_Id" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+  <Association Name="UserPerson">
+    <End Role="User" Type="Model1.Store.UserSet" Multiplicity="1" />
+    <End Role="Person" Type="Model1.Store.PersonSet" Multiplicity="*" />
+    <ReferentialConstraint>
+      <Principal Role="User">
+        <PropertyRef Name="Id" />
+      </Principal>
+      <Dependent Role="Person">
+        <PropertyRef Name="UserId" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+  <Association Name="UserRolUser">
+    <End Role="UserRol" Type="Model1.Store.UserRolSet" Multiplicity="*" />
+    <End Role="User" Type="Model1.Store.UserSet" Multiplicity="1" />
+    <ReferentialConstraint>
+      <Principal Role="User">
+        <PropertyRef Name="Id" />
+      </Principal>
+      <Dependent Role="UserRol">
+        <PropertyRef Name="User_Id" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+  <Association Name="UserRolRol">
+    <End Role="UserRol" Type="Model1.Store.UserRolSet" Multiplicity="*" />
+    <End Role="Rol" Type="Model1.Store.RolSet" Multiplicity="1" />
+    <ReferentialConstraint>
+      <Principal Role="Rol">
+        <PropertyRef Name="Id" />
+      </Principal>
+      <Dependent Role="UserRol">
+        <PropertyRef Name="Rol_Id" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+  <Association Name="moduleFormForm">
+    <End Role="moduleForm" Type="Model1.Store.moduleFormSet" Multiplicity="*" />
+    <End Role="Form" Type="Model1.Store.FormSet" Multiplicity="1" />
+    <ReferentialConstraint>
+      <Principal Role="Form">
+        <PropertyRef Name="Id" />
+      </Principal>
+      <Dependent Role="moduleForm">
+        <PropertyRef Name="Form_Id" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+  <Association Name="moduleFormModule">
+    <End Role="moduleForm" Type="Model1.Store.moduleFormSet" Multiplicity="*" />
+    <End Role="Module" Type="Model1.Store.ModuleSet" Multiplicity="1" />
+    <ReferentialConstraint>
+      <Principal Role="Module">
+        <PropertyRef Name="Id" />
+      </Principal>
+      <Dependent Role="moduleForm">
+        <PropertyRef Name="Module_Id" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+  <Association Name="RolFormPermissionForm">
+    <End Role="RolFormPermission" Type="Model1.Store.RolFormPermissionSet" Multiplicity="*" />
+    <End Role="Form" Type="Model1.Store.FormSet" Multiplicity="1" />
+    <ReferentialConstraint>
+      <Principal Role="Form">
+        <PropertyRef Name="Id" />
+      </Principal>
+      <Dependent Role="RolFormPermission">
+        <PropertyRef Name="Form_Id" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+  <Association Name="RolFormPermissionRol">
+    <End Role="RolFormPermission" Type="Model1.Store.RolFormPermissionSet" Multiplicity="*" />
+    <End Role="Rol" Type="Model1.Store.RolSet" Multiplicity="1" />
+    <ReferentialConstraint>
+      <Principal Role="Rol">
+        <PropertyRef Name="Id" />
+      </Principal>
+      <Dependent Role="RolFormPermission">
+        <PropertyRef Name="Rol_Id" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+  <Association Name="RolFormPermissionPermision">
+    <End Role="RolFormPermission" Type="Model1.Store.RolFormPermissionSet" Multiplicity="*" />
+    <End Role="Permision" Type="Model1.Store.PermisionSet" Multiplicity="1" />
+    <ReferentialConstraint>
+      <Principal Role="Permision">
+        <PropertyRef Name="Id" />
+      </Principal>
+      <Dependent Role="RolFormPermission">
+        <PropertyRef Name="Permision_Id" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+</Schema></edmx:StorageModels>
     <!-- CSDL content -->
     <edmx:ConceptualModels>
       <Schema xmlns="http://schemas.microsoft.com/ado/2009/11/edm" xmlns:cg="http://schemas.microsoft.com/ado/2006/04/codegeneration" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" Namespace="Model1" Alias="Self" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" annotation:UseStrongSpatialTypes="false">
@@ -18,36 +263,19 @@
           <EntitySet Name="ModuleSet" EntityType="Model1.Module" />
           <EntitySet Name="FormSet" EntityType="Model1.Form" />
           <EntitySet Name="RolSet" EntityType="Model1.Rol" />
-          <AssociationSet Name="RolUser" Association="Model1.RolUser">
-            <End Role="Rol" EntitySet="RolSet" />
-            <End Role="User" EntitySet="UserSet" />
-          </AssociationSet>
           <EntitySet Name="PermisosSet" EntityType="Model1.Permisos" />
-          <EntitySet Name="logsSet" EntityType="Model1.logs" />
           <EntitySet Name="moduleFormSet" EntityType="Model1.moduleForm" />
-          <AssociationSet Name="ModulemoduleForm" Association="Model1.ModulemoduleForm">
-            <End Role="moduleForm" EntitySet="moduleFormSet" />
-            <End Role="Module" EntitySet="ModuleSet" />
-          </AssociationSet>
-          <AssociationSet Name="moduleFormForm" Association="Model1.moduleFormForm">
-            <End Role="moduleForm" EntitySet="moduleFormSet" />
-            <End Role="Form" EntitySet="FormSet" />
-          </AssociationSet>
-          <EntitySet Name="rolPermisoSet" EntityType="Model1.rolPermiso" />
-          <AssociationSet Name="rolPermisoRol" Association="Model1.rolPermisoRol">
-            <End Role="rolPermiso" EntitySet="rolPermisoSet" />
-            <End Role="Rol" EntitySet="RolSet" />
-          </AssociationSet>
-          <AssociationSet Name="rolPermisoPermisos" Association="Model1.rolPermisoPermisos">
-            <End Role="rolPermiso" EntitySet="rolPermisoSet" />
+          <EntitySet Name="PermisionSet" EntityType="Model1.Permision" />
+          <EntitySet Name="UserRolSet" EntityType="Model1.UserRol" />
+          <EntitySet Name="RolFormPermissionSet" EntityType="Model1.RolFormPermission" />
+          <AssociationSet Name="UserRolPersmisionPermisos" Association="Model1.UserRolPersmisionPermisos">
+            <End Role="UserRolPersmision" EntitySet="RolFormPermissionSet" />
             <End Role="Permisos" EntitySet="PermisosSet" />
           </AssociationSet>
-          <EntitySet Name="PermisionSet" EntityType="Model1.Permision" />
           <AssociationSet Name="UserPerson" Association="Model1.UserPerson">
             <End Role="User" EntitySet="UserSet" />
             <End Role="Person" EntitySet="PersonSet" />
           </AssociationSet>
-          <EntitySet Name="UserRolSet" EntityType="Model1.UserRol" />
           <AssociationSet Name="UserRolUser" Association="Model1.UserRolUser">
             <End Role="UserRol" EntitySet="UserRolSet" />
             <End Role="User" EntitySet="UserSet" />
@@ -56,22 +284,25 @@
             <End Role="UserRol" EntitySet="UserRolSet" />
             <End Role="Rol" EntitySet="RolSet" />
           </AssociationSet>
-          <EntitySet Name="RolFormPermissionSet" EntityType="Model1.RolFormPermission" />
-          <AssociationSet Name="UserRolPersmisionPermisos" Association="Model1.UserRolPersmisionPermisos">
-            <End Role="UserRolPersmision" EntitySet="RolFormPermissionSet" />
-            <End Role="Permisos" EntitySet="PermisosSet" />
-          </AssociationSet>
-          <AssociationSet Name="UserRolPersmisionPermision" Association="Model1.UserRolPersmisionPermision">
-            <End Role="UserRolPersmision" EntitySet="RolFormPermissionSet" />
-            <End Role="Permision" EntitySet="PermisionSet" />
-          </AssociationSet>
-          <AssociationSet Name="UserRolPersmisionForm" Association="Model1.UserRolPersmisionForm">
-            <End Role="UserRolPersmision" EntitySet="RolFormPermissionSet" />
+          <AssociationSet Name="moduleFormForm" Association="Model1.moduleFormForm">
+            <End Role="moduleForm" EntitySet="moduleFormSet" />
             <End Role="Form" EntitySet="FormSet" />
           </AssociationSet>
-          <AssociationSet Name="UserRolPersmisionRol" Association="Model1.UserRolPersmisionRol">
-            <End Role="UserRolPersmision" EntitySet="RolFormPermissionSet" />
+          <AssociationSet Name="moduleFormModule" Association="Model1.moduleFormModule">
+            <End Role="moduleForm" EntitySet="moduleFormSet" />
+            <End Role="Module" EntitySet="ModuleSet" />
+          </AssociationSet>
+          <AssociationSet Name="RolFormPermissionForm" Association="Model1.RolFormPermissionForm">
+            <End Role="RolFormPermission" EntitySet="RolFormPermissionSet" />
+            <End Role="Form" EntitySet="FormSet" />
+          </AssociationSet>
+          <AssociationSet Name="RolFormPermissionRol" Association="Model1.RolFormPermissionRol">
+            <End Role="RolFormPermission" EntitySet="RolFormPermissionSet" />
             <End Role="Rol" EntitySet="RolSet" />
+          </AssociationSet>
+          <AssociationSet Name="RolFormPermissionPermision" Association="Model1.RolFormPermissionPermision">
+            <End Role="RolFormPermission" EntitySet="RolFormPermissionSet" />
+            <End Role="Permision" EntitySet="PermisionSet" />
           </AssociationSet>
         </EntityContainer>
         <EntityType Name="User">
@@ -81,9 +312,10 @@
           <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
           <Property Name="UserName" Type="String" Nullable="false" />
           <Property Name="Password" Type="String" Nullable="false" />
-          <Property Name="state" Type="String" Nullable="false" />
-          <NavigationProperty Name="IdRol" Relationship="Model1.RolUser" FromRole="User" ToRole="Rol" />
+          <Property Name="State" Type="String" Nullable="false" />
           <NavigationProperty Name="Person" Relationship="Model1.UserPerson" FromRole="User" ToRole="Person" />
+          <Property Name="UserRolId" Type="Int32" Nullable="false" />
+          <NavigationProperty Name="UserRol" Relationship="Model1.UserRolUser" FromRole="User" ToRole="UserRol" />
         </EntityType>
         <EntityType Name="Person">
           <Key>
@@ -95,7 +327,9 @@
           <Property Name="Email" Type="String" Nullable="false" />
           <Property Name="Identification" Type="String" Nullable="false" />
           <Property Name="Age" Type="String" Nullable="false" />
+          <Property Name="Status" Type="String" Nullable="false" />
           <NavigationProperty Name="User" Relationship="Model1.UserPerson" FromRole="Person" ToRole="User" />
+          <Property Name="UserId" Type="Int32" Nullable="false" />
         </EntityType>
         <EntityType Name="Module">
           <Key>
@@ -105,7 +339,7 @@
           <Property Name="Name" Type="String" Nullable="false" />
           <Property Name="Descripcion" Type="String" Nullable="false" />
           <Property Name="Code" Type="String" Nullable="false" />
-          <NavigationProperty Name="moduleForm" Relationship="Model1.ModulemoduleForm" FromRole="Module" ToRole="moduleForm" />
+          <NavigationProperty Name="moduleForm" Relationship="Model1.moduleFormModule" FromRole="Module" ToRole="moduleForm" />
         </EntityType>
         <EntityType Name="Form">
           <Key>
@@ -115,7 +349,7 @@
           <Property Name="Name" Type="String" Nullable="false" />
           <Property Name="Description" Type="String" Nullable="false" />
           <NavigationProperty Name="moduleForm" Relationship="Model1.moduleFormForm" FromRole="Form" ToRole="moduleForm" />
-          <NavigationProperty Name="UserRolPersmision" Relationship="Model1.UserRolPersmisionForm" FromRole="Form" ToRole="UserRolPersmision" />
+          <NavigationProperty Name="RolFormPermission" Relationship="Model1.RolFormPermissionForm" FromRole="Form" ToRole="RolFormPermission" />
         </EntityType>
         <EntityType Name="Rol">
           <Key>
@@ -123,25 +357,11 @@
           </Key>
           <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
           <Property Name="Name" Type="String" Nullable="false" />
-          <Property Name="code" Type="String" Nullable="false" />
           <Property Name="Active" Type="String" Nullable="false" />
           <Property Name="Description" Type="String" Nullable="false" />
-          <NavigationProperty Name="User" Relationship="Model1.RolUser" FromRole="Rol" ToRole="User" />
           <NavigationProperty Name="UserRol" Relationship="Model1.UserRolRol" FromRole="Rol" ToRole="UserRol" />
-          <NavigationProperty Name="UserRolPersmision" Relationship="Model1.UserRolPersmisionRol" FromRole="Rol" ToRole="UserRolPersmision" />
+          <NavigationProperty Name="RolFormPermission" Relationship="Model1.RolFormPermissionRol" FromRole="Rol" ToRole="RolFormPermission" />
         </EntityType>
-        <Association Name="RolUser">
-          <End Type="Model1.Rol" Role="Rol" Multiplicity="1" />
-          <End Type="Model1.User" Role="User" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="Rol">
-              <PropertyRef Name="Id" />
-            </Principal>
-            <Dependent Role="User">
-              <PropertyRef Name="RolId" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
         <EntityType Name="Permisos">
           <Key>
             <PropertyRef Name="Id" />
@@ -149,50 +369,16 @@
           <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
           <Property Name="Action" Type="String" Nullable="false" />
           <Property Name="Description" Type="String" Nullable="false" />
-          <NavigationProperty Name="rolPermiso" Relationship="Model1.rolPermisoPermisos" FromRole="Permisos" ToRole="rolPermiso" />
           <NavigationProperty Name="UserRolPersmision" Relationship="Model1.UserRolPersmisionPermisos" FromRole="Permisos" ToRole="UserRolPersmision" />
-        </EntityType>
-        <EntityType Name="logs">
-          <Key>
-            <PropertyRef Name="Id" />
-          </Key>
-          <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
-          <Property Name="IdUser" Type="String" Nullable="false" />
-          <Property Name="Action" Type="String" Nullable="false" />
-          <Property Name="TableAffected" Type="String" Nullable="false" />
-          <Property Name="Date" Type="String" Nullable="false" />
         </EntityType>
         <EntityType Name="moduleForm">
           <Key>
             <PropertyRef Name="Id" />
           </Key>
           <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
-          <NavigationProperty Name="Module" Relationship="Model1.ModulemoduleForm" FromRole="moduleForm" ToRole="Module" />
           <NavigationProperty Name="Form" Relationship="Model1.moduleFormForm" FromRole="moduleForm" ToRole="Form" />
+          <NavigationProperty Name="Module" Relationship="Model1.moduleFormModule" FromRole="moduleForm" ToRole="Module" />
         </EntityType>
-        <Association Name="ModulemoduleForm">
-          <End Type="Model1.moduleForm" Role="moduleForm" Multiplicity="*" />
-          <End Type="Model1.Module" Role="Module" Multiplicity="1" />
-        </Association>
-        <Association Name="moduleFormForm">
-          <End Type="Model1.moduleForm" Role="moduleForm" Multiplicity="*" />
-          <End Type="Model1.Form" Role="Form" Multiplicity="1" />
-        </Association>
-        <EntityType Name="rolPermiso">
-          <Key>
-            <PropertyRef Name="Id" />
-          </Key>
-          <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
-          <NavigationProperty Name="Rol" Relationship="Model1.rolPermisoRol" FromRole="rolPermiso" ToRole="Rol" />
-        </EntityType>
-        <Association Name="rolPermisoRol">
-          <End Type="Model1.rolPermiso" Role="rolPermiso" Multiplicity="*" />
-          <End Type="Model1.Rol" Role="Rol" Multiplicity="1" />
-        </Association>
-        <Association Name="rolPermisoPermisos">
-          <End Type="Model1.rolPermiso" Role="rolPermiso" Multiplicity="*" />
-          <End Type="Model1.Permisos" Role="Permisos" Multiplicity="1" />
-        </Association>
         <EntityType Name="Permision">
           <Key>
             <PropertyRef Name="Id" />
@@ -200,12 +386,8 @@
           <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
           <Property Name="Name" Type="String" Nullable="false" />
           <Property Name="Descripcion" Type="String" Nullable="false" />
-          <NavigationProperty Name="UserRolPersmision" Relationship="Model1.UserRolPersmisionPermision" FromRole="Permision" ToRole="UserRolPersmision" />
+          <NavigationProperty Name="RolFormPermission" Relationship="Model1.RolFormPermissionPermision" FromRole="Permision" ToRole="RolFormPermission" />
         </EntityType>
-        <Association Name="UserPerson">
-          <End Type="Model1.User" Role="User" Multiplicity="*" />
-          <End Type="Model1.Person" Role="Person" Multiplicity="1" />
-        </Association>
         <EntityType Name="UserRol">
           <Key>
             <PropertyRef Name="Id" />
@@ -214,6 +396,31 @@
           <NavigationProperty Name="User" Relationship="Model1.UserRolUser" FromRole="UserRol" ToRole="User" />
           <NavigationProperty Name="Rol" Relationship="Model1.UserRolRol" FromRole="UserRol" ToRole="Rol" />
         </EntityType>
+        <EntityType Name="RolFormPermission">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <NavigationProperty Name="Form" Relationship="Model1.RolFormPermissionForm" FromRole="RolFormPermission" ToRole="Form" />
+          <NavigationProperty Name="Rol" Relationship="Model1.RolFormPermissionRol" FromRole="RolFormPermission" ToRole="Rol" />
+          <NavigationProperty Name="Permision" Relationship="Model1.RolFormPermissionPermision" FromRole="RolFormPermission" ToRole="Permision" />
+        </EntityType>
+        <Association Name="UserRolPersmisionPermisos">
+          <End Type="Model1.RolFormPermission" Role="UserRolPersmision" Multiplicity="*" />
+          <End Type="Model1.Permisos" Role="Permisos" Multiplicity="1" />
+        </Association>
+        <Association Name="UserPerson">
+          <End Type="Model1.User" Role="User" Multiplicity="1" />
+          <End Type="Model1.Person" Role="Person" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="User">
+              <PropertyRef Name="Id" />
+            </Principal>
+            <Dependent Role="Person">
+              <PropertyRef Name="UserId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
         <Association Name="UserRolUser">
           <End Type="Model1.UserRol" Role="UserRol" Multiplicity="*" />
           <End Type="Model1.User" Role="User" Multiplicity="1" />
@@ -222,58 +429,191 @@
           <End Type="Model1.UserRol" Role="UserRol" Multiplicity="*" />
           <End Type="Model1.Rol" Role="Rol" Multiplicity="1" />
         </Association>
-        <EntityType Name="RolFormPermission">
-          <Key>
-            <PropertyRef Name="Id" />
-          </Key>
-          <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
-          <NavigationProperty Name="Permision" Relationship="Model1.UserRolPersmisionPermision" FromRole="UserRolPersmision" ToRole="Permision" />
-          <NavigationProperty Name="Form" Relationship="Model1.UserRolPersmisionForm" FromRole="UserRolPersmision" ToRole="Form" />
-          <NavigationProperty Name="Rol" Relationship="Model1.UserRolPersmisionRol" FromRole="UserRolPersmision" ToRole="Rol" />
-        </EntityType>
-        <Association Name="UserRolPersmisionPermisos">
-          <End Type="Model1.RolFormPermission" Role="UserRolPersmision" Multiplicity="*" />
-          <End Type="Model1.Permisos" Role="Permisos" Multiplicity="1" />
+        <Association Name="moduleFormForm">
+          <End Type="Model1.moduleForm" Role="moduleForm" Multiplicity="*" />
+          <End Type="Model1.Form" Role="Form" Multiplicity="1" />
         </Association>
-        <Association Name="UserRolPersmisionPermision">
-          <End Type="Model1.RolFormPermission" Role="UserRolPersmision" Multiplicity="1" />
-          <End Type="Model1.Permision" Role="Permision" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="UserRolPersmision">
-              <PropertyRef Name="Id" />
-            </Principal>
-            <Dependent Role="Permision">
-              <PropertyRef Name="UserRolPersmisionId" />
-            </Dependent>
-          </ReferentialConstraint>
+        <Association Name="moduleFormModule">
+          <End Type="Model1.moduleForm" Role="moduleForm" Multiplicity="*" />
+          <End Type="Model1.Module" Role="Module" Multiplicity="1" />
         </Association>
-        <Association Name="UserRolPersmisionForm">
-          <End Type="Model1.RolFormPermission" Role="UserRolPersmision" Multiplicity="1" />
-          <End Type="Model1.Form" Role="Form" Multiplicity="*" />
+        <Association Name="RolFormPermissionForm">
+          <End Type="Model1.RolFormPermission" Role="RolFormPermission" Multiplicity="*" />
+          <End Type="Model1.Form" Role="Form" Multiplicity="1" />
         </Association>
-        <Association Name="UserRolPersmisionRol">
-          <End Type="Model1.RolFormPermission" Role="UserRolPersmision" Multiplicity="1" />
-          <End Type="Model1.Rol" Role="Rol" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="UserRolPersmision">
-              <PropertyRef Name="Id" />
-            </Principal>
-            <Dependent Role="Rol">
-              <PropertyRef Name="UserRolPersmisionId" />
-            </Dependent>
-          </ReferentialConstraint>
+        <Association Name="RolFormPermissionRol">
+          <End Type="Model1.RolFormPermission" Role="RolFormPermission" Multiplicity="*" />
+          <End Type="Model1.Rol" Role="Rol" Multiplicity="1" />
+        </Association>
+        <Association Name="RolFormPermissionPermision">
+          <End Type="Model1.RolFormPermission" Role="RolFormPermission" Multiplicity="*" />
+          <End Type="Model1.Permision" Role="Permision" Multiplicity="1" />
         </Association>
       </Schema>
     </edmx:ConceptualModels>
     <!-- C-S mapping content -->
     <edmx:Mappings>
-      <Mapping xmlns="http://schemas.microsoft.com/ado/2009/11/mapping/cs" Space="C-S">
-        <Alias Key="Model" Value="Model1" />
-        <Alias Key="Target" Value="Model1.Store" />
-        <EntityContainerMapping CdmEntityContainer="Model1Container" StorageEntityContainer="Model1TargetContainer">
-        </EntityContainerMapping>
-      </Mapping>
-    </edmx:Mappings>
+    <Mapping Space="C-S" xmlns="http://schemas.microsoft.com/ado/2009/11/mapping/cs">
+  <EntityContainerMapping StorageEntityContainer="Model1StoreContainer" CdmEntityContainer="Model1Container">
+    <EntitySetMapping Name="UserSet">
+      <EntityTypeMapping TypeName="IsTypeOf(Model1.User)">
+        <MappingFragment StoreEntitySet="UserSet">
+          <ScalarProperty Name="Id" ColumnName="Id" />
+          <ScalarProperty Name="UserName" ColumnName="UserName" />
+          <ScalarProperty Name="Password" ColumnName="Password" />
+          <ScalarProperty Name="State" ColumnName="State" />
+          <ScalarProperty Name="UserRolId" ColumnName="UserRolId" />
+        </MappingFragment>
+      </EntityTypeMapping>
+    </EntitySetMapping>
+    <EntitySetMapping Name="PersonSet">
+      <EntityTypeMapping TypeName="IsTypeOf(Model1.Person)">
+        <MappingFragment StoreEntitySet="PersonSet">
+          <ScalarProperty Name="Id" ColumnName="Id" />
+          <ScalarProperty Name="Name" ColumnName="Name" />
+          <ScalarProperty Name="LastName" ColumnName="LastName" />
+          <ScalarProperty Name="Email" ColumnName="Email" />
+          <ScalarProperty Name="Identification" ColumnName="Identification" />
+          <ScalarProperty Name="Age" ColumnName="Age" />
+          <ScalarProperty Name="Status" ColumnName="Status" />
+          <ScalarProperty Name="UserId" ColumnName="UserId" />
+        </MappingFragment>
+      </EntityTypeMapping>
+    </EntitySetMapping>
+    <EntitySetMapping Name="ModuleSet">
+      <EntityTypeMapping TypeName="IsTypeOf(Model1.Module)">
+        <MappingFragment StoreEntitySet="ModuleSet">
+          <ScalarProperty Name="Id" ColumnName="Id" />
+          <ScalarProperty Name="Name" ColumnName="Name" />
+          <ScalarProperty Name="Descripcion" ColumnName="Descripcion" />
+          <ScalarProperty Name="Code" ColumnName="Code" />
+        </MappingFragment>
+      </EntityTypeMapping>
+    </EntitySetMapping>
+    <EntitySetMapping Name="FormSet">
+      <EntityTypeMapping TypeName="IsTypeOf(Model1.Form)">
+        <MappingFragment StoreEntitySet="FormSet">
+          <ScalarProperty Name="Id" ColumnName="Id" />
+          <ScalarProperty Name="Name" ColumnName="Name" />
+          <ScalarProperty Name="Description" ColumnName="Description" />
+        </MappingFragment>
+      </EntityTypeMapping>
+    </EntitySetMapping>
+    <EntitySetMapping Name="RolSet">
+      <EntityTypeMapping TypeName="IsTypeOf(Model1.Rol)">
+        <MappingFragment StoreEntitySet="RolSet">
+          <ScalarProperty Name="Id" ColumnName="Id" />
+          <ScalarProperty Name="Name" ColumnName="Name" />
+          <ScalarProperty Name="Active" ColumnName="Active" />
+          <ScalarProperty Name="Description" ColumnName="Description" />
+        </MappingFragment>
+      </EntityTypeMapping>
+    </EntitySetMapping>
+    <EntitySetMapping Name="PermisosSet">
+      <EntityTypeMapping TypeName="IsTypeOf(Model1.Permisos)">
+        <MappingFragment StoreEntitySet="PermisosSet">
+          <ScalarProperty Name="Id" ColumnName="Id" />
+          <ScalarProperty Name="Action" ColumnName="Action" />
+          <ScalarProperty Name="Description" ColumnName="Description" />
+        </MappingFragment>
+      </EntityTypeMapping>
+    </EntitySetMapping>
+    <EntitySetMapping Name="moduleFormSet">
+      <EntityTypeMapping TypeName="IsTypeOf(Model1.moduleForm)">
+        <MappingFragment StoreEntitySet="moduleFormSet">
+          <ScalarProperty Name="Id" ColumnName="Id" />
+        </MappingFragment>
+      </EntityTypeMapping>
+    </EntitySetMapping>
+    <EntitySetMapping Name="PermisionSet">
+      <EntityTypeMapping TypeName="IsTypeOf(Model1.Permision)">
+        <MappingFragment StoreEntitySet="PermisionSet">
+          <ScalarProperty Name="Id" ColumnName="Id" />
+          <ScalarProperty Name="Name" ColumnName="Name" />
+          <ScalarProperty Name="Descripcion" ColumnName="Descripcion" />
+        </MappingFragment>
+      </EntityTypeMapping>
+    </EntitySetMapping>
+    <EntitySetMapping Name="UserRolSet">
+      <EntityTypeMapping TypeName="IsTypeOf(Model1.UserRol)">
+        <MappingFragment StoreEntitySet="UserRolSet">
+          <ScalarProperty Name="Id" ColumnName="Id" />
+        </MappingFragment>
+      </EntityTypeMapping>
+    </EntitySetMapping>
+    <EntitySetMapping Name="RolFormPermissionSet">
+      <EntityTypeMapping TypeName="IsTypeOf(Model1.RolFormPermission)">
+        <MappingFragment StoreEntitySet="RolFormPermissionSet">
+          <ScalarProperty Name="Id" ColumnName="Id" />
+        </MappingFragment>
+      </EntityTypeMapping>
+    </EntitySetMapping>
+    <AssociationSetMapping Name="UserRolPersmisionPermisos" TypeName="Model1.UserRolPersmisionPermisos" StoreEntitySet="RolFormPermissionSet">
+      <EndProperty Name="Permisos">
+        <ScalarProperty Name="Id" ColumnName="UserRolPersmisionPermisos_UserRolPersmision_Id" />
+      </EndProperty>
+      <EndProperty Name="UserRolPersmision">
+        <ScalarProperty Name="Id" ColumnName="Id" />
+      </EndProperty>
+    </AssociationSetMapping>
+    <AssociationSetMapping Name="UserRolUser" TypeName="Model1.UserRolUser" StoreEntitySet="UserRolSet">
+      <EndProperty Name="User">
+        <ScalarProperty Name="Id" ColumnName="User_Id" />
+      </EndProperty>
+      <EndProperty Name="UserRol">
+        <ScalarProperty Name="Id" ColumnName="Id" />
+      </EndProperty>
+    </AssociationSetMapping>
+    <AssociationSetMapping Name="UserRolRol" TypeName="Model1.UserRolRol" StoreEntitySet="UserRolSet">
+      <EndProperty Name="Rol">
+        <ScalarProperty Name="Id" ColumnName="Rol_Id" />
+      </EndProperty>
+      <EndProperty Name="UserRol">
+        <ScalarProperty Name="Id" ColumnName="Id" />
+      </EndProperty>
+    </AssociationSetMapping>
+    <AssociationSetMapping Name="moduleFormForm" TypeName="Model1.moduleFormForm" StoreEntitySet="moduleFormSet">
+      <EndProperty Name="Form">
+        <ScalarProperty Name="Id" ColumnName="Form_Id" />
+      </EndProperty>
+      <EndProperty Name="moduleForm">
+        <ScalarProperty Name="Id" ColumnName="Id" />
+      </EndProperty>
+    </AssociationSetMapping>
+    <AssociationSetMapping Name="moduleFormModule" TypeName="Model1.moduleFormModule" StoreEntitySet="moduleFormSet">
+      <EndProperty Name="Module">
+        <ScalarProperty Name="Id" ColumnName="Module_Id" />
+      </EndProperty>
+      <EndProperty Name="moduleForm">
+        <ScalarProperty Name="Id" ColumnName="Id" />
+      </EndProperty>
+    </AssociationSetMapping>
+    <AssociationSetMapping Name="RolFormPermissionForm" TypeName="Model1.RolFormPermissionForm" StoreEntitySet="RolFormPermissionSet">
+      <EndProperty Name="Form">
+        <ScalarProperty Name="Id" ColumnName="Form_Id" />
+      </EndProperty>
+      <EndProperty Name="RolFormPermission">
+        <ScalarProperty Name="Id" ColumnName="Id" />
+      </EndProperty>
+    </AssociationSetMapping>
+    <AssociationSetMapping Name="RolFormPermissionRol" TypeName="Model1.RolFormPermissionRol" StoreEntitySet="RolFormPermissionSet">
+      <EndProperty Name="Rol">
+        <ScalarProperty Name="Id" ColumnName="Rol_Id" />
+      </EndProperty>
+      <EndProperty Name="RolFormPermission">
+        <ScalarProperty Name="Id" ColumnName="Id" />
+      </EndProperty>
+    </AssociationSetMapping>
+    <AssociationSetMapping Name="RolFormPermissionPermision" TypeName="Model1.RolFormPermissionPermision" StoreEntitySet="RolFormPermissionSet">
+      <EndProperty Name="Permision">
+        <ScalarProperty Name="Id" ColumnName="Permision_Id" />
+      </EndProperty>
+      <EndProperty Name="RolFormPermission">
+        <ScalarProperty Name="Id" ColumnName="Id" />
+      </EndProperty>
+    </AssociationSetMapping>
+  </EntityContainerMapping>
+</Mapping></edmx:Mappings>
   </edmx:Runtime>
   <!-- EF Designer content (DO NOT EDIT MANUALLY BELOW HERE) -->
   <edmx:Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
@@ -287,6 +627,7 @@
         <DesignerProperty Name="ValidateOnBuild" Value="true" />
         <DesignerProperty Name="EnablePluralization" Value="False" />
         <DesignerProperty Name="CodeGenerationStrategy" Value="Ninguno" />
+        <DesignerProperty Name="UseLegacyProvider" Value="False" />
       </DesignerInfoPropertySet>
     </edmx:Options>
     <!-- Diagram content (shape and connector positions) -->

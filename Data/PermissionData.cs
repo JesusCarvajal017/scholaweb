@@ -9,69 +9,164 @@ namespace Data
     public class PermissionData
     {
         private readonly ApplicationDbContext _context;
-        private readonly ILogger logger;
-        public PermissionData(ApplicationDbContext context, ILogger logger)
+        private readonly ILogger<PermissionData> _logger;
+        public PermissionData(ApplicationDbContext context, ILogger<PermissionData> logger)
         {
             _context = context;
-            this.logger = logger;
+            this._logger = logger;
         }
 
+        //======================================______________  SQL  ______________====================================== 
 
-        //====================================== consultas por medio de SQL ====================================== 
-
-        //Método para obtener todos los Permissionas con SQL
+        // SELECT ALL
         public async Task<IEnumerable<Permission>> GetAllAsync()
         {
             try
             {
-                const string query = "SELECT * FROM Permission WHERE Status = 0;";
+                const string query = @"SELECT * FROM Permission WHERE ""Status"" = 1
+                                        ORDER BY ""Id"" ASC ;";
                 return await _context.QueryAsync<Permission>(query);
             }
             catch (Exception ex)
             {
-                logger.LogInformation(ex, "No se pudo obetner a las Permissionas");
+                _logger.LogInformation(ex, "No se pudo obetner a los permisos");
                 throw;
             }
         }
 
-
-        //Método para obtener por Id con SQL
+        // SELECT BY ID
         public async Task<Permission?> GetByIdAsync(int id)
         {
             try
             {
-                const string query = "SELECT * FROM Permission WHERE Id = @Id;";
+                const string query = @"SELECT * FROM Permission WHERE ""Id"" = @Id;";
                 var parameters = new { Id = id };
                 return await _context.QueryFirstOrDefaultAsync<Permission>(query, parameters);
 
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, $"Error al traer una Permissiona por id {id}");
+                _logger.LogError(ex, $"Error al traer una Permissiona por id {id}");
                 throw;
             }
         }
 
+        // INSERT 
+        public async Task<Permission> CreateAsync(Permission Permission)
+        {
+            try
+            {
+                const string query = @"
+                           INSERT INTO public.permission(
+	                        ""Name"", ""Description"", ""Status"")
+	                        VALUES (@Name, @Description, @Status);";
 
-        //====================================== consultas por medio de LINQ ====================================== 
-        //Método para obtener todos los Permissionas con LINQ
+                var parameters = new
+                {
+                    Permission.Name,
+                    Permission.Description,
+                    Status = 1
+                };
+
+                Permission.Id = await _context.ExecuteScalarAsync<int>(query, parameters);
+                Permission.Status = 1;
+
+                return Permission;
+
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"no se pudo agregar Permissiona {Permission}");
+                throw;
+            }
+        }
+
+        // UPDATE
+        public async Task<bool> UpdateAsync(Permission Permission)
+        {
+            try
+            {
+                const string query = @"
+                                  UPDATE public.permission
+	                                SET ""Name""=@Name, ""Description""=@Description
+	                                WHERE ""Id""=@Id;";
+
+                var parameters = new
+                {
+                    Permission.Id,
+                    Permission.Name,
+                    Permission.Description
+                };
+
+                int rowsAffected = await _context.ExecuteAsync(query, parameters);
+                return rowsAffected > 0;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"No se pudo actualizar {Permission}");
+                throw;
+
+            }
+        }
+
+        // DELETE PERSISTENT
+        public async Task<Object> DeletePersistentAsync(int id)
+        {
+            try
+            {
+                const string query = @"DELETE FROM Permission
+                                        WHERE ""Id"" = @Id";
+                var parameters = new { Id = id };
+                var delete = await _context.ExecuteAsync(query, parameters);
+                return new { rowAfefects = delete };
+            }
+            catch (Exception ex)
+            {
+                _logger.LogInformation($" error al eliminar {ex.Message}");
+                return false;
+            }
+        }
+
+        // DELETE LOGICAL
+        public async Task<Object> DeleteLogicalAsync(int id)
+        {
+            try
+            {
+                const string query = @"UPDATE Permission 
+                                        SET ""Status"" = 0 
+                                        WHERE ""Id"" = @Id";
+                var parameters = new { Id = id };
+                var deleteLogical = await _context.ExecuteAsync(query, parameters);
+                return new { rowAfectes = deleteLogical };
+
+            }
+            catch (Exception ex)
+            {
+                _logger.LogInformation($"Error al realizar delete lógico: {ex.Message}");
+                return false;
+            }
+        }
+
+
+        //======================================______________  LINQ  ______________====================================== 
+
+        // SELECT ALL
         public async Task<IEnumerable<Permission>> GetAllAsyncLinq()
         {
             try
             {
                 return await _context.Set<Permission>()
-                .Where(p => p.Status == 0)
+                .Where(p => p.Status == 1)
                 .ToListAsync();
             }
             catch (Exception ex)
             {
-                logger.LogInformation(ex, "No se pudo obetner a las Permissionas");
+                _logger.LogInformation(ex, "No se pudo obetner a las Permissionas");
                 throw;
             }
         }
 
-
-        //Método para obtener por Id con LINQ
+        // SELECT BY ID
         public async Task<Permission?> GetByIdAsyncLinq(int id)
         {
             try
@@ -81,43 +176,12 @@ namespace Data
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, $"Error al traer una Permissiona por id {id}");
+                _logger.LogError(ex, $"Error al traer una Permissiona por id {id}");
                 throw;
             }
         }
 
-        // ============================= Create Permission SLQ =============================
-        public async Task<Permission> CreateAsync(Permission Permission)
-        {
-            try
-            {
-                const string query = @"
-
-                            INSERT INTO Permission (Name, Description, Status)
-                            OUTPUT INSERTED.Id
-                            VALUES (@Name, @Description, @Status);";
-
-                var parameters = new
-                {
-                    Name = Permission.Name,
-                    Description = Permission.Description,
-                    Status = Permission.Status
-                };
-
-                Permission.Id = await _context.ExecuteScalarAsync<int>(query, parameters);
-                Permission.Status = 0; // Establece el estado de la Permissiona (activo e inactivo)
-                return Permission;
-
-            }
-            catch (Exception ex)
-            {
-                logger.LogError(ex, $"no se pudo agregar Permissiona {Permission}");
-                throw;
-            }
-        }
-
-
-        // ============================= Create Permission LINQ =============================
+        // INSERT 
         public async Task<Permission> CreateAsyncLinq(Permission Permission)
         {
             try
@@ -130,44 +194,12 @@ namespace Data
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, $"no se pudo agregar Permissiona {Permission}");
+                _logger.LogError(ex, $"no se pudo agregar Permissiona {Permission}");
                 throw;
             }
         }
 
-
-        // ============================= Update Permission sql==================
-        public async Task<bool> UpdateAsync(Permission Permission)
-        {
-            try
-            {
-                const string query = @"
-                                    UPDATE Permission
-                                    SET
-                                        Name = @Name,
-                                        Description = @Description,
-                                        Status = @Status,
-                                    WHERE Id = @Id; ";
-
-                var parameters = new
-                {
-                    Name = Permission.Name,
-                    Description = Permission.Description,
-                    Status = Permission.Status
-                };
-
-                int rowsAffected = await _context.ExecuteAsync(query, parameters);
-                return rowsAffected > 0;
-            }
-            catch (Exception ex)
-            {
-                logger.LogError(ex, $"No se pudo actualizar {Permission}");
-                throw;
-
-            }
-        }
-
-        // ============================= Update Permission LINQ =========================
+        // UPDATE
         public async Task<bool> UpdateAsyncLinq(Permission Permission)
         {
             try
@@ -178,35 +210,13 @@ namespace Data
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, $"No se pudo actualizar {Permission}");
+                _logger.LogError(ex, $"No se pudo actualizar {Permission}");
                 throw;
 
             }
         }
 
-
-        // ======================================================= Delte Persistent =======================================================
-
-        // ============================= Delte Permission sql =========================
-        public async Task<bool> DeletePersistentAsync(int id)
-        {
-            try
-            {
-                const string query = @"DELETE FROM Permission
-                                        WHERE Id = @Id";
-
-                var parameters = new { Id = id };
-                await _context.ExecuteAsync(query, parameters);
-                return true;
-            }
-            catch (Exception ex)
-            {
-                logger.LogInformation($" error al eliminar {ex.Message}");
-                return false;
-            }
-        }
-
-        // ============================= Delte Permission LINQ =========================
+        // DELETE PERSISTENT
         public async Task<bool> DeletePersistentAsyncLinq(int id)
         {
             try
@@ -221,35 +231,12 @@ namespace Data
             }
             catch (Exception ex)
             {
-                logger.LogInformation($" error al eliminar {ex.Message}");
+                _logger.LogInformation($" error al eliminar {ex.Message}");
                 return false;
             }
         }
 
-
-        // ======================================================= Delte Logical =======================================================
-
-        // ============================= Delte Permission  =========================
-        public async Task<bool> DeleteLogicalAsync(int id)
-        {
-            try
-            {
-                const string query = @"UPDATE Permission 
-                                        SET Status = 1 
-                                        WHERE Id = @Id";
-                var parameters = new { Id = id };
-                await _context.ExecuteAsync(query, parameters);
-                return true;
-            }
-            catch (Exception ex)
-            {
-                logger.LogInformation($"Error al realizar delete lógico: {ex.Message}");
-                return false;
-            }
-        }
-
-
-        //Método para Eliminar lógico linq
+        // DELETE LOGICAL
         public async Task<bool> DeleteLogicalAsyncLinq(int id)
         {
             try
@@ -264,7 +251,7 @@ namespace Data
             }
             catch (Exception ex)
             {
-                logger.LogInformation($"Error al realizar delete lógico con LINQ: {ex.Message}");
+                _logger.LogInformation($"Error al realizar delete lógico con LINQ: {ex.Message}");
                 return false;
             }
         }

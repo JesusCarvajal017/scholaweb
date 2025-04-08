@@ -6,10 +6,6 @@ using Utilities.Exeptions;
 
 namespace Web.Controllers
 {
-    /// <summary>
-    /// Controlador para la gestión de permisos en el sistema
-    /// </summary>
-
     [Route("api/[controller]")]
     [ApiController]
     [Produces("application/json")]
@@ -25,7 +21,7 @@ namespace Web.Controllers
             _logger = logger;
         }
       
-        //consulta general => funciona SLQ AND LINQ
+        // QUERY ALL
         [HttpGet]
         [ProducesResponseType(typeof(IEnumerable<RolDto>), 200)]
         [ProducesResponseType(500)]
@@ -43,7 +39,7 @@ namespace Web.Controllers
             }
         }
 
-        /// Obtiene un permiso específico por su ID => SQL AND LINQ
+        // QUERY BY ID
         [HttpGet("{id}")]
         [ProducesResponseType(typeof(RolDto), 200)]
         [ProducesResponseType(400)]
@@ -73,8 +69,7 @@ namespace Web.Controllers
             }
         }
 
-        //insertar un nuevo rol 
-        /// Crea un nuevo permiso en el sistema => SQL AND LINQ
+        // INSERT 
         [HttpPost]
         [ProducesResponseType(typeof(RolDto), 201)]
         [ProducesResponseType(400)]
@@ -98,18 +93,50 @@ namespace Web.Controllers
             }
         }
 
-        // actualizar
-        [HttpPut("{id}")]
+        // UPDATE
+        [HttpPut("update")]
+        [ProducesResponseType(typeof(Object), 200)]
         [ProducesResponseType(204)]
         [ProducesResponseType(400)]
         [ProducesResponseType(404)]
         [ProducesResponseType(500)]
-        public async Task<IActionResult> UpdateRol(int id)
+        public async Task<IActionResult> UpdateRol([FromBody] RolDto RolDto)
         {
             try
             {
-                await _RolBusiness.DeleteRolAsync(id);
-                return NoContent(); // Código 204: Eliminación exitosa sin contenido
+                var update = await _RolBusiness.UpdateRolAsync(RolDto);
+                return Ok(update);
+            }
+            catch (ValidationException ex)
+            {
+                _logger.LogWarning(ex, "Validación fallida al actualizacion el rol con ID: {RolId}", RolDto.Id);
+                return BadRequest(new { message = ex.Message });
+            }
+            catch (EntityNotFoundException ex)
+            {
+                _logger.LogInformation(ex, "Rol no encontrado con ID: {RolId}", RolDto.Id);
+                return NotFound(new { message = ex.Message });
+            }
+            catch (ExternalServiceException ex)
+            {
+                _logger.LogError(ex, "Error al actualizar el rol con ID: {RolId}", RolDto.Id);
+                return StatusCode(500, new { message = ex.Message });
+            }
+        }
+
+        // DELETE => LOGICAL
+        [HttpPut("logical/{id}")]
+        [ProducesResponseType(typeof(Object), 200)]
+        [ProducesResponseType(204)]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(404)]
+        [ProducesResponseType(500)]
+        public async Task<IActionResult> DeletleRol(int id)
+        {
+            try
+            {
+                var response = await _RolBusiness.DeletelogicaRollAsync(id);
+                return Ok(response); 
             }
             catch (ValidationException ex)
             {
@@ -128,8 +155,9 @@ namespace Web.Controllers
             }
         }
 
-        // eliminar
+        // DELETE => PERSISTENT
         [HttpDelete("{id}")]
+        [ProducesResponseType(typeof(Object), 200)]
         [ProducesResponseType(204)] 
         [ProducesResponseType(400)]
         [ProducesResponseType(404)]
@@ -138,8 +166,8 @@ namespace Web.Controllers
         {
             try
             {
-                await _RolBusiness.DeleteRolAsync(id);
-                return NoContent(); // Código 204: Eliminación exitosa sin contenido
+                var response = await _RolBusiness.DeletePersistenRolAsync(id);
+                return Ok(response); // Código 204: Eliminación exitosa sin contenido
             }
             catch (ValidationException ex)
             {
@@ -157,8 +185,5 @@ namespace Web.Controllers
                 return StatusCode(500, new { message = ex.Message });
             }
         }
-
-        
-
     }
 }

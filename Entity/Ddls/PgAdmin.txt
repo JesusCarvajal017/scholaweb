@@ -1,0 +1,80 @@
+﻿CREATE TABLE "Person" (
+    "Id" SERIAL PRIMARY KEY,
+    "Name" VARCHAR(100) NOT NULL,
+    "LastName" VARCHAR(150) NOT NULL,
+    "Email" VARCHAR(150),
+    "Identification" VARCHAR(14) NOT NULL,
+    "Age" INT NOT NULL,
+    "Status" INT NOT NULL,
+
+    UNIQUE ("Email"),
+    UNIQUE ("Identification")
+);
+
+CREATE TABLE "User" (
+    "Id" SERIAL PRIMARY KEY,
+    "UserName" VARCHAR(150) NOT NULL,
+    "Password" TEXT NOT NULL,
+    "Status" VARCHAR(150) NOT NULL,
+    "PersonId" INT NOT NULL,
+
+    UNIQUE ("UserName"),
+    FOREIGN KEY ("PersonId") REFERENCES "Person"("Id")
+);
+
+CREATE TABLE "Rol" (
+    "Id" SERIAL PRIMARY KEY,
+    "Name" VARCHAR(100) NOT NULL,
+    "Description" VARCHAR(150) NOT NULL,
+    "Status" INT NOT NULL
+);
+
+CREATE TABLE "Form" (
+    "Id" SERIAL PRIMARY KEY,
+    "Name" VARCHAR(100) NOT NULL,
+    "Description" VARCHAR(150) NOT NULL,
+    "Status" INT NOT NULL
+);
+
+CREATE TABLE "Module" (
+    "Id" SERIAL PRIMARY KEY,
+    "Name" VARCHAR(100) NOT NULL,
+    "Descripcion" VARCHAR(150) NOT NULL,
+    "Status" INT NOT NULL
+);
+
+CREATE TABLE "Permission" (
+    "Id" SERIAL PRIMARY KEY,
+    "Name" VARCHAR(100) NOT NULL,
+    "Description" VARCHAR(150) NOT NULL,
+    "Status" INT NOT NULL
+);
+
+CREATE TABLE "ModuleForm" (
+    "Id" SERIAL PRIMARY KEY,
+    "FormId" INT NOT NULL,
+    "ModuleId" INT NOT NULL,
+
+    FOREIGN KEY ("FormId") REFERENCES "Form"("Id"),
+    FOREIGN KEY ("ModuleId") REFERENCES "Module"("Id")
+);
+
+CREATE TABLE "UserRol" (
+    "Id" SERIAL PRIMARY KEY,
+    "UserId" INT NOT NULL,
+    "RolId" INT NOT NULL,
+
+    FOREIGN KEY ("UserId") REFERENCES "User"("Id"),
+    FOREIGN KEY ("RolId") REFERENCES "Rol"("Id")
+);
+
+CREATE TABLE "RolFormPermission" (
+    "Id" SERIAL PRIMARY KEY,
+    "Form_Id" INT NOT NULL,
+    "Rol_Id" INT NOT NULL,
+    "Permision_Id" INT NOT NULL,
+
+    FOREIGN KEY ("Form_Id") REFERENCES "Form"("Id"),
+    FOREIGN KEY ("Rol_Id") REFERENCES "Rol"("Id"),
+    FOREIGN KEY ("Permision_Id") REFERENCES "Permission"("Id")
+);

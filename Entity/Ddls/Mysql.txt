@@ -1,0 +1,96 @@
+﻿use segurity;
+
+CREATE TABLE `Person` (
+    `Id` INT AUTO_INCREMENT NOT NULL,
+    `Name` VARCHAR(100) NOT NULL,
+    `LastName` VARCHAR(150) NOT NULL,
+    `Email` VARCHAR(150),
+    `Identification` VARCHAR(14) NOT NULL,
+    `Age` INT NOT NULL,
+    `Status` INT NOT NULL,
+
+    PRIMARY KEY (`Id`),
+    UNIQUE (`Email`),
+    UNIQUE (`Identification`)
+);
+
+CREATE TABLE `User` (
+    `Id` INT AUTO_INCREMENT NOT NULL,
+    `UserName` VARCHAR(150) NOT NULL, 
+    `Password` TEXT NOT NULL,
+    `Status` VARCHAR(150) NOT NULL,
+    `PersonId` INT NOT NULL,
+
+    PRIMARY KEY (`Id`),
+    UNIQUE (`UserName`),
+    FOREIGN KEY (`PersonId`) REFERENCES `Person`(`Id`)
+);
+
+CREATE TABLE `Rol` (
+    `Id` INT AUTO_INCREMENT NOT NULL,
+    `Name` VARCHAR(100) NOT NULL,
+    `Description` VARCHAR(150) NOT NULL,
+    `Status` INT NOT NULL,
+
+    PRIMARY KEY (`Id`)
+);
+
+CREATE TABLE `Form` (
+    `Id` INT AUTO_INCREMENT NOT NULL,
+    `Name` VARCHAR(100) NOT NULL,
+    `Description` VARCHAR(150) NOT NULL,
+    `Status` INT NOT NULL,
+
+    PRIMARY KEY (`Id`)
+);
+
+CREATE TABLE `Module` (
+    `Id` INT AUTO_INCREMENT NOT NULL,
+    `Name` VARCHAR(100) NOT NULL,
+    `Descripcion` VARCHAR(150) NOT NULL,
+    `Status` INT NOT NULL,
+
+    PRIMARY KEY (`Id`)
+);
+
+CREATE TABLE `Permission` (
+    `Id` INT AUTO_INCREMENT NOT NULL,
+    `Name` VARCHAR(100) NOT NULL,
+    `Description` VARCHAR(150) NOT NULL,
+    `Status` INT NOT NULL,
+
+    PRIMARY KEY (`Id`)
+);
+
+CREATE TABLE `ModuleForm` (
+    `Id` INT AUTO_INCREMENT NOT NULL,
+    `FormId` INT NOT NULL,
+    `ModuleId` INT NOT NULL,
+
+    PRIMARY KEY (`Id`),
+    FOREIGN KEY (`FormId`) REFERENCES `Form`(`Id`),
+    FOREIGN KEY (`ModuleId`) REFERENCES `Module`(`Id`)
+);
+
+CREATE TABLE `UserRol` (
+    `Id` INT AUTO_INCREMENT NOT NULL,
+    `UserId` INT NOT NULL,
+    `RolId` INT NOT NULL,
+
+    PRIMARY KEY (`Id`),
+    FOREIGN KEY (`UserId`) REFERENCES `User`(`Id`),
+    FOREIGN KEY (`RolId`) REFERENCES `Rol`(`Id`)
+);
+
+CREATE TABLE `RolFormPermission` (
+    `Id` INT AUTO_INCREMENT NOT NULL,
+    `Form_Id` INT NOT NULL,
+    `Rol_Id` INT NOT NULL,
+    `Permision_Id` INT NOT NULL,
+
+    PRIMARY KEY (`Id`),
+    FOREIGN KEY (`Form_Id`) REFERENCES `Form`(`Id`),
+    FOREIGN KEY (`Rol_Id`) REFERENCES `Rol`(`Id`),
+    FOREIGN KEY (`Permision_Id`) REFERENCES `Permission`(`Id`)
+);
+

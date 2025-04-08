@@ -10,16 +10,16 @@ namespace Business
     {
 
         private readonly UserData _UserData;
-        private readonly ILogger _logger;
+        private readonly ILogger<UserBusiness> _logger;
 
-        public UserBusiness(UserData UserData, ILogger logger)
+        public UserBusiness(UserData UserData, ILogger<UserBusiness> logger)
         {
             _UserData = UserData;
             _logger = logger;
         }
 
         // Método para obtener todos los Useres como DTOs
-        public async Task<IEnumerable<UserDto>> GetAllUseresAsync()
+        public async Task<IEnumerable<UserDto>> GetAllUsersAsync()
         {
             try
             {
@@ -80,6 +80,84 @@ namespace Business
             }
         }
 
+
+
+        // UPDATE User
+        public async Task<Object> UpdateUserAsync(UserDto UserDto)
+        {
+            try
+            {
+
+                ValidateUser(UserDto);
+                int id = UserDto.Id;
+                var UserValid = await _UserData.GetByIdAsync(id);
+
+                var User = MapToEntity(UserDto);
+                var updateUser = await _UserData.UpdateAsync(User);
+
+                return new { status = updateUser };
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error al obtener el User con ID: {UserId}", UserDto.Id);
+                throw new ExternalServiceException("Base de datos", $"Error al recuperar el User con ID {UserDto.Id}", ex);
+            }
+        }
+
+        //DELETE User => LOGICAL
+        public async Task<Object> DeletelogicaUserlAsync(int id)
+        {
+            if (id <= 0)
+            {
+                _logger.LogWarning("Id invalido {UserId}", id);
+                throw new Utilities.Exceptions.ValidationException("id", "El ID del User debe ser mayor que cero");
+            }
+
+            try
+            {
+                var User = await _UserData.DeleteLogicalAsync(id);
+                if (User == null)
+                {
+                    _logger.LogInformation("No se encontró ningún User con ID: {UserId}", id);
+                    throw new EntityNotFoundException("User", id);
+                }
+
+                return User;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error al obtener el User con ID: {UserId}", id);
+                throw new ExternalServiceException("Base de datos", $"Error al recuperar el User con ID {id}", ex);
+            }
+        }
+
+        // DELETE PERSISTENT
+        public async Task<Object> DeletePersistenUserAsync(int id)
+        {
+            if (id <= 0)
+            {
+                _logger.LogWarning("Id invalido {UserId}", id);
+                throw new Utilities.Exceptions.ValidationException("id", "El ID del User debe ser mayor que cero");
+            }
+
+            try
+            {
+                var User = await _UserData.DeletePersistentAsync(id);
+                if (User == null)
+                {
+                    _logger.LogInformation("No se encontró ningún User con ID: {UserId}", id);
+                    throw new EntityNotFoundException("User", id);
+                }
+
+                return User;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error al obtener el User con ID: {UserId}", id);
+                throw new ExternalServiceException("Base de datos", $"Error al recuperar el User con ID {id}", ex);
+            }
+        }
+
         // Método para validar el DTO
         private void ValidateUser(UserDto UserDto)
         {
@@ -103,6 +181,9 @@ namespace Business
             {
                 Id = User.Id,
                 UserName = User.UserName,
+                Pass = User.Password,
+                PersonId = User.PersonId,
+                Status = User.Status
             };
         }
 
@@ -113,7 +194,9 @@ namespace Business
             {
                 Id = UserDTO.Id,
                 UserName = UserDTO.UserName,
-                Status = UserDTO.status
+                Password = UserDTO.Pass,
+                PersonId = UserDTO.PersonId,
+                Status = UserDTO.Status
             };
         }
 

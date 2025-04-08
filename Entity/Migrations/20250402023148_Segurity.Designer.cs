@@ -11,8 +11,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Entity.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250330181637_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20250402023148_Segurity")]
+    partial class Segurity
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -56,10 +56,6 @@ namespace Entity.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("Code")
-                        .IsRequired()
-                        .HasColumnType("text");
-
                     b.Property<string>("Description")
                         .IsRequired()
                         .HasColumnType("text");
@@ -73,7 +69,30 @@ namespace Entity.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("module");
+                    b.ToTable("Module");
+                });
+
+            modelBuilder.Entity("Entity.Model.ModuleForm", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("FormId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("ModuleId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("FormId");
+
+                    b.HasIndex("ModuleId");
+
+                    b.ToTable("ModuleForm");
                 });
 
             modelBuilder.Entity("Entity.Model.Permission", b =>
@@ -132,7 +151,7 @@ namespace Entity.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("person");
+                    b.ToTable("Person");
                 });
 
             modelBuilder.Entity("Entity.Model.Rol", b =>
@@ -142,10 +161,6 @@ namespace Entity.Migrations
                         .HasColumnType("integer");
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Code")
-                        .IsRequired()
-                        .HasColumnType("text");
 
                     b.Property<string>("Description")
                         .IsRequired()
@@ -161,6 +176,34 @@ namespace Entity.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("rol");
+                });
+
+            modelBuilder.Entity("Entity.Model.RolFormPermission", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("FormId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("PermissionId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("RolId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("FormId");
+
+                    b.HasIndex("PermissionId");
+
+                    b.HasIndex("RolId");
+
+                    b.ToTable("RolFormPermission");
                 });
 
             modelBuilder.Entity("Entity.Model.User", b =>
@@ -192,10 +235,79 @@ namespace Entity.Migrations
                     b.ToTable("user");
                 });
 
+            modelBuilder.Entity("Entity.Model.UserRol", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("RolId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("RolId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("userRol");
+                });
+
+            modelBuilder.Entity("Entity.Model.ModuleForm", b =>
+                {
+                    b.HasOne("Entity.Model.Form", "Form")
+                        .WithMany("ModuleForm")
+                        .HasForeignKey("FormId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Entity.Model.Module", "Module")
+                        .WithMany("ModuleForm")
+                        .HasForeignKey("ModuleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Form");
+
+                    b.Navigation("Module");
+                });
+
+            modelBuilder.Entity("Entity.Model.RolFormPermission", b =>
+                {
+                    b.HasOne("Entity.Model.Form", "Form")
+                        .WithMany("RolFormPermissions")
+                        .HasForeignKey("FormId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Entity.Model.Permission", "Permission")
+                        .WithMany("RolFormPermissions")
+                        .HasForeignKey("PermissionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Entity.Model.Rol", "Rol")
+                        .WithMany("RolFormPermissions")
+                        .HasForeignKey("RolId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Form");
+
+                    b.Navigation("Permission");
+
+                    b.Navigation("Rol");
+                });
+
             modelBuilder.Entity("Entity.Model.User", b =>
                 {
                     b.HasOne("Entity.Model.Person", "Person")
-                        .WithMany("Users")
+                        .WithMany("User")
                         .HasForeignKey("PersonId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -203,9 +315,57 @@ namespace Entity.Migrations
                     b.Navigation("Person");
                 });
 
+            modelBuilder.Entity("Entity.Model.UserRol", b =>
+                {
+                    b.HasOne("Entity.Model.Rol", "Rol")
+                        .WithMany("UserRol")
+                        .HasForeignKey("RolId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Entity.Model.User", "User")
+                        .WithMany("UserRols")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Rol");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("Entity.Model.Form", b =>
+                {
+                    b.Navigation("ModuleForm");
+
+                    b.Navigation("RolFormPermissions");
+                });
+
+            modelBuilder.Entity("Entity.Model.Module", b =>
+                {
+                    b.Navigation("ModuleForm");
+                });
+
+            modelBuilder.Entity("Entity.Model.Permission", b =>
+                {
+                    b.Navigation("RolFormPermissions");
+                });
+
             modelBuilder.Entity("Entity.Model.Person", b =>
                 {
-                    b.Navigation("Users");
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("Entity.Model.Rol", b =>
+                {
+                    b.Navigation("RolFormPermissions");
+
+                    b.Navigation("UserRol");
+                });
+
+            modelBuilder.Entity("Entity.Model.User", b =>
+                {
+                    b.Navigation("UserRols");
                 });
 #pragma warning restore 612, 618
         }

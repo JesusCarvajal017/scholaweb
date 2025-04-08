@@ -5,7 +5,6 @@ FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS base
 USER $APP_UID
 WORKDIR /app
 EXPOSE 8080
-EXPOSE 8081
 
 
 # Esta fase se usa para compilar el proyecto de servicio
@@ -13,6 +12,10 @@ FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 COPY ["Web/Web.csproj", "Web/"]
+COPY ["Business/Business.csproj", "Business/"]
+COPY ["Data/Data.csproj", "Data/"]
+COPY ["Entity/Entity.csproj", "Entity/"]
+COPY ["Utilities/Utilities.csproj", "Utilities/"]
 RUN dotnet restore "./Web/Web.csproj"
 COPY . .
 WORKDIR "/src/Web"

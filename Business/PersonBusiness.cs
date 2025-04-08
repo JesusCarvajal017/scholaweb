@@ -1,5 +1,4 @@
-﻿
-using Data;
+﻿using Data;
 using Entity.DTOs;
 using Entity.Model;
 using Microsoft.Extensions.Logging;
@@ -10,9 +9,9 @@ namespace Business
     public class PersonBusiness
     {
         private readonly PersonData _PersonData;
-        private readonly ILogger _logger;
+        private readonly ILogger<PersonBusiness> _logger;
 
-        public PersonBusiness(PersonData PersonData, ILogger logger)
+        public PersonBusiness(PersonData PersonData, ILogger<PersonBusiness> logger)
         {
             _PersonData = PersonData;
             _logger = logger;
@@ -23,7 +22,7 @@ namespace Business
         {
             try
             {
-                var Person = await _PersonData.GetAllAsync();
+                var Person = await _PersonData.GetAllAsyncLinq();
                 return MapToDTOList(Person); ;
             }
             catch (Exception ex)
@@ -80,6 +79,82 @@ namespace Business
             }
         }
 
+        // UPDATE Person
+        public async Task<Object> UpdatePersonAsync(PersonDto PersonDto)
+        {
+            try
+            {
+
+                ValidatePerson(PersonDto);
+                int id = PersonDto.Id;
+                var PersonValid = await _PersonData.GetByIdAsync(id);
+
+                var Person = MapToEntity(PersonDto);
+                var updatePerson = await _PersonData.UpdateAsync(Person);
+
+                return new { status = updatePerson };
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error al obtener el Person con ID: {PersonId}", PersonDto.Id);
+                throw new ExternalServiceException("Base de datos", $"Error al recuperar el Person con ID {PersonDto.Id}", ex);
+            }
+        }
+
+        //DELETE Person => LOGICAL
+        public async Task<Object> DeletelogicaPersonlAsync(int id)
+        {
+            if (id <= 0)
+            {
+                _logger.LogWarning("Id invalido {PersonId}", id);
+                throw new Utilities.Exceptions.ValidationException("id", "El ID del Person debe ser mayor que cero");
+            }
+
+            try
+            {
+                var Person = await _PersonData.DeleteLogicalAsync(id);
+                if (Person == null)
+                {
+                    _logger.LogInformation("No se encontró ningún Person con ID: {PersonId}", id);
+                    throw new EntityNotFoundException("Person", id);
+                }
+
+                return Person;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error al obtener el Person con ID: {PersonId}", id);
+                throw new ExternalServiceException("Base de datos", $"Error al recuperar el Person con ID {id}", ex);
+            }
+        }
+
+        // DELETE PERSISTENT
+        public async Task<Object> DeletePersistenPersonAsync(int id)
+        {
+            if (id <= 0)
+            {
+                _logger.LogWarning("Id invalido {PersonId}", id);
+                throw new Utilities.Exceptions.ValidationException("id", "El ID del Person debe ser mayor que cero");
+            }
+
+            try
+            {
+                var Person = await _PersonData.DeletePersistentAsync(id);
+                if (Person == null)
+                {
+                    _logger.LogInformation("No se encontró ningún Person con ID: {PersonId}", id);
+                    throw new EntityNotFoundException("Person", id);
+                }
+
+                return Person;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error al obtener el Person con ID: {PersonId}", id);
+                throw new ExternalServiceException("Base de datos", $"Error al recuperar el Person con ID {id}", ex);
+            }
+        }
+
         // Método para validar el DTO
         private void ValidatePerson(PersonDto PersonDto)
         {
@@ -95,7 +170,6 @@ namespace Business
             }
         }
 
-
         // Método para mapear de Person a PersonDTO
         private PersonDto MapToDTO(Person Person)
         {
@@ -103,7 +177,12 @@ namespace Business
             {
                 Id = Person.Id,
                 Name = Person.Name,
-                LastName = Person.LastName // Si existe en la entidad
+                NameComplet = (Person.Name + " " +  Person.LastName),
+                LastName = Person.LastName,
+                Email = Person.Email,
+                Identification = Person.Identification,
+                Age = Person.Age,
+                Status = Person.Status
             };
         }
 
@@ -114,7 +193,11 @@ namespace Business
             {
                 Id = PersonDTO.Id,
                 Name= PersonDTO.Name,
-                LastName = PersonDTO.LastName // Si existe en la entidad
+                LastName = PersonDTO.LastName,
+                Email = PersonDTO.Email,
+                Identification = PersonDTO.Identification,
+                Age = PersonDTO.Age,
+                Status = PersonDTO.Status
             };
         }
 
@@ -128,8 +211,6 @@ namespace Business
             }
             return PersonDTO;
         }
-
-
 
     }
 }

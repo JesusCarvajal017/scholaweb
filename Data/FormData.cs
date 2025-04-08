@@ -8,70 +8,165 @@ namespace Data
     public class FormData
     {
         private readonly ApplicationDbContext _context;
-        private readonly ILogger logger;
-        public FormData(ApplicationDbContext context, ILogger logger)
+        private readonly ILogger<FormData> _logger;
+        public FormData(ApplicationDbContext context, ILogger<FormData> logger)
         {
             _context = context;
-            this.logger = logger;
+            this._logger = logger;
         }
 
+        //======================================______________  SQL  ______________====================================== 
 
-        //====================================== consultas por medio de SQL ====================================== 
-
-        //Método para obtener todos los Formas con SQL
+        // SELECT ALL
         public async Task<IEnumerable<Form>> GetAllAsync()
         {
             try
             {
-                const string query = "SELECT * FROM Form WHERE Status = 0;";
+                const string query = @"SELECT * FROM Form WHERE ""Status"" = 1
+                                        ORDER BY ""Id"" ASC ;";
                 return await _context.QueryAsync<Form>(query);
             }
             catch (Exception ex)
             {
-                logger.LogInformation(ex, "No se pudo obetner a las Formas");
+                _logger.LogInformation(ex, "No se pudo obetner a las Formas");
                 throw;
             }
         }
 
-
-        //Método para obtener por Id con SQL
+        // SELECT BY ID
         public async Task<Form?> GetByIdAsync(int id)
         {
             try
             {
-                const string query = "SELECT * FROM Form WHERE Id = @Id;";
+                const string query = @"SELECT * FROM Form WHERE ""Id"" = @Id;";
                 var parameters = new { Id = id };
                 return await _context.QueryFirstOrDefaultAsync<Form>(query, parameters);
 
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, $"Error al traer una Forma por id {id}");
+                _logger.LogError(ex, $"Error al traer una Forma por id {id}");
                 throw;
             }
         }
 
+        // INSERT 
+        public async Task<Form> CreateAsync(Form Form)
+        {
+            try
+            {
+                const string query = @"
+                                INSERT INTO public.form(
+	                            ""Name"", ""Description"", ""Status"")
+	                            VALUES (@Name, @Description, @Status)
+                               RETURNING ""Id"";";
 
-        //====================================== consultas por medio de LINQ ====================================== 
+                var parameters = new
+                {
+                    Name = Form.Name,
+                    Description = Form.Description,
+                    Status = 1
+                };
 
-        //Método para obtener todos los Formas con LINQ
+                Form.Id = await _context.ExecuteScalarAsync<int>(query, parameters);
+                Form.Status = 1;
+
+                return Form;
+
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"no se pudo agregar Forma {Form}");
+                throw;
+            }
+        }
+
+        // UPDATE
+        public async Task<bool> UpdateAsync(Form Form)
+        {
+            try
+            {
+                const string query = @"
+                                  UPDATE public.form
+	                                SET ""Name""=@Name, ""Description""=@Description
+	                                WHERE ""Id"" = @Id;";
+
+                var parameters = new
+                {
+                    Form.Id,
+                    Form.Name,
+                    Form.Description
+                };
+
+                int rowsAffected = await _context.ExecuteAsync(query, parameters);
+                return rowsAffected > 0;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"No se pudo actualizar {Form}");
+                throw;
+
+            }
+        }
+
+        // DELETE PERSISTENT
+        public async Task<Object> DeletePersistentAsync(int id)
+        {
+            try
+            {
+                const string query = @"DELETE FROM Form
+                                        WHERE ""Id"" = @Id";
+                var parameters = new { Id = id };
+                var delete = await _context.ExecuteAsync(query, parameters);
+                return new { rowAfefects = delete };
+            }
+            catch (Exception ex)
+            {
+                _logger.LogInformation($" error al eliminar {ex.Message}");
+                return false;
+            }
+        }
+
+        // DELETE LOGICAL
+        public async Task<Object> DeleteLogicalAsync(int id)
+        {
+            try
+            {
+                const string query = @"UPDATE public.form 
+                                        SET ""Status"" = 0 
+                                        WHERE ""Id"" = @Id";
+                var parameters = new { Id = id };
+                var deleteLogical = await _context.ExecuteAsync(query, parameters);
+                return new { rowAfectes = deleteLogical };
+
+            }
+            catch (Exception ex)
+            {
+                _logger.LogInformation($"Error al realizar delete lógico: {ex.Message}");
+                return new { Status = false };
+            }
+        }
+
+
+        //======================================______________  LINQ  ______________====================================== 
+
+        // SELECT ALL
         public async Task<IEnumerable<Form>> GetAllAsyncLinq()
         {
             try
             {
                 return await _context.Set<Form>()
-                .Where(p => p.Status == 0)
+                .Where(p => p.Status == 1)
                 .ToListAsync();
             }
             catch (Exception ex)
             {
-                logger.LogInformation(ex, "No se pudo obetner a las Formas");
+                _logger.LogInformation(ex, "No se pudo obetner a las Formas");
                 throw;
             }
         }
 
-
-        //Método para obtener por Id con LINQ
+        // SELECT BY ID
         public async Task<Form?> GetByIdAsyncLinq(int id)
         {
             try
@@ -81,42 +176,12 @@ namespace Data
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, $"Error al traer una Forma por id {id}");
+                _logger.LogError(ex, $"Error al traer una Forma por id {id}");
                 throw;
             }
         }
 
-        // ============================= Create Form SLQ =============================
-        public async Task<Form> CreateAsync(Form Form)
-        {
-            try
-            {
-                const string query = @"
-                            INSERT INTO Form (Name, Description, Status)
-                            OUTPUT INSERTED.Id
-                            VALUES (@Name, @Description, @Status);";
-
-                var parameters = new
-                {
-                    Name = Form.Name,
-                    Description = Form.Description,
-                    Status = Form.Status
-                };
-
-                Form.Id = await _context.ExecuteScalarAsync<int>(query, parameters);
-                Form.Status = 0; // Establece el estado de la Forma (activo e inactivo)
-                return Form;
-
-            }
-            catch (Exception ex)
-            {
-                logger.LogError(ex, $"no se pudo agregar Forma {Form}");
-                throw;
-            }
-        }
-
-
-        // ============================= Create Form LINQ =============================
+        // INSERT 
         public async Task<Form> CreateAsyncLinq(Form Form)
         {
             try
@@ -129,44 +194,12 @@ namespace Data
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, $"no se pudo agregar Forma {Form}");
+                _logger.LogError(ex, $"no se pudo agregar Forma {Form}");
                 throw;
             }
         }
 
-
-        // ============================= Update Form sql==================
-        public async Task<bool> UpdateAsync(Form Form)
-        {
-            try
-            {
-                const string query = @"
-                                    UPDATE Form
-                                    SET
-                                        Name = @Name,
-                                        Description = @Description,
-                                        Status = @Status,
-                                    WHERE Id = @Id; ";
-
-                var parameters = new
-                {
-                    Name = Form.Name,
-                    Description = Form.Description,
-                    Status = Form.Status
-                };
-
-                int rowsAffected = await _context.ExecuteAsync(query, parameters);
-                return rowsAffected > 0;
-            }
-            catch (Exception ex)
-            {
-                logger.LogError(ex, $"No se pudo actualizar {Form}");
-                throw;
-
-            }
-        }
-
-        // ============================= Update Form LINQ =========================
+        // UPDATE
         public async Task<bool> UpdateAsyncLinq(Form Form)
         {
             try
@@ -177,35 +210,13 @@ namespace Data
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, $"No se pudo actualizar {Form}");
+                _logger.LogError(ex, $"No se pudo actualizar {Form}");
                 throw;
 
             }
         }
 
-
-        // ======================================================= Delte Persistent =======================================================
-
-        // ============================= Delte Form sql =========================
-        public async Task<bool> DeletePersistentAsync(int id)
-        {
-            try
-            {
-                const string query = @"DELETE FROM Form
-                                        WHERE Id = @Id";
-
-                var parameters = new { Id = id };
-                await _context.ExecuteAsync(query, parameters);
-                return true;
-            }
-            catch (Exception ex)
-            {
-                logger.LogInformation($" error al eliminar {ex.Message}");
-                return false;
-            }
-        }
-
-        // ============================= Delte Form LINQ =========================
+        // DELETE PERSISTENT
         public async Task<bool> DeletePersistentAsyncLinq(int id)
         {
             try
@@ -220,35 +231,12 @@ namespace Data
             }
             catch (Exception ex)
             {
-                logger.LogInformation($" error al eliminar {ex.Message}");
+                _logger.LogInformation($" error al eliminar {ex.Message}");
                 return false;
             }
         }
 
-
-        // ======================================================= Delte Logical =======================================================
-
-        // ============================= Delte Form  =========================
-        public async Task<bool> DeleteLogicalAsync(int id)
-        {
-            try
-            {
-                const string query = @"UPDATE Form 
-                                        SET Status = 1 
-                                        WHERE Id = @Id";
-                var parameters = new { Id = id };
-                await _context.ExecuteAsync(query, parameters);
-                return true;
-            }
-            catch (Exception ex)
-            {
-                logger.LogInformation($"Error al realizar delete lógico: {ex.Message}");
-                return false;
-            }
-        }
-
-
-        //Método para Eliminar lógico linq
+        // DELETE LOGICAL
         public async Task<bool> DeleteLogicalAsyncLinq(int id)
         {
             try
@@ -263,7 +251,7 @@ namespace Data
             }
             catch (Exception ex)
             {
-                logger.LogInformation($"Error al realizar delete lógico con LINQ: {ex.Message}");
+                _logger.LogInformation($"Error al realizar delete lógico con LINQ: {ex.Message}");
                 return false;
             }
         }

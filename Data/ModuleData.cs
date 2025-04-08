@@ -1,4 +1,5 @@
 ﻿
+using System.Collections.Generic;
 using Entity;
 using Entity.Model;
 using Microsoft.EntityFrameworkCore;
@@ -9,117 +10,182 @@ namespace Data
     public class ModuleData
     {
         private readonly ApplicationDbContext _context;
-        private readonly ILogger logger;
-        public ModuleData(ApplicationDbContext context, ILogger logger)
+        private readonly ILogger<ModuleData> _logger;
+        public ModuleData(ApplicationDbContext context, ILogger<ModuleData> logger)
         {
             _context = context;
-            this.logger = logger;
+            this._logger = logger;
         }
 
+        //======================================______________  SQL  ______________====================================== 
 
-        //====================================== consultas por medio de SQL ====================================== 
-
-        //Método para obtener todos los Moduleas con SQL
+        // SELECT ALL
         public async Task<IEnumerable<Module>> GetAllAsync()
         {
             try
             {
-                const string query = @"SELECT * FROM Module WHERE ""Status"" = 0;";
+                const string query = @"SELECT * FROM ""Module"" WHERE ""Status"" = 1
+                                        ORDER BY ""Id"" ASC ;";
                 return await _context.QueryAsync<Module>(query);
             }
             catch (Exception ex)
             {
-                logger.LogInformation(ex, "No se pudo obetner a las Modulo");
+                _logger.LogInformation(ex, "No se pudo obetner a las Moduleas");
                 throw;
             }
         }
 
-
-        //Método para obtener por Id con SQL
+        // SELECT BY ID
         public async Task<Module?> GetByIdAsync(int id)
         {
             try
             {
-                const string query = "SELECT * FROM Module WHERE Id = @Id;";
+                const string query = @"SELECT * FROM public.""Module"" WHERE ""Id"" = @Id;";
                 var parameters = new { Id = id };
                 return await _context.QueryFirstOrDefaultAsync<Module>(query, parameters);
 
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, $"Error al traer una Modulea por id {id}");
+                _logger.LogError(ex, $"Error al traer una Modulea por id {id}");
                 throw;
             }
         }
 
-
-        //====================================== consultas por medio de LINQ ====================================== 
-
-        //Método para obtener todos los Moduleas con LINQ
-        public async Task<IEnumerable<Module>> GetAllAsyncLinq()
-        {
-            try
-            {
-                return await _context.Set<Module>()
-                .Where(p => p.Status == 0)
-                .ToListAsync();
-            }
-            catch (Exception ex)
-            {
-                logger.LogInformation(ex, "No se pudo obetner a las Moduleas");
-                throw;
-            }
-        }
-
-
-        //Método para obtener por Id con LINQ
-        public async Task<Module?> GetByIdAsyncLinq(int id)
-        {
-            try
-            {
-                return await _context.Set<Module>().FindAsync(id);
-            }
-            catch (Exception ex)
-            {
-                logger.LogError(ex, $"Error al traer una Modulea por id {id}");
-                throw;
-            }
-        }
-
-        // ============================= Create Module SLQ =============================
+        // INSERT 
         public async Task<Module> CreateAsync(Module Module)
         {
             try
             {
-               
-
                 const string query = @"
-                                        INSERT INTO Module (""Name"", ""Code"", ""Description"", ""Status"")
-                                        OUTPUT INSERTED.Id
-                                        VALUES (@Name, @Code, @Description, @Status);";
+            
+                            INSERT INTO public.""Module""(
+	                            ""Name"", ""Description"", ""Status"")
+	                            VALUES (@Name, @Description, @Status)
+                            RETURNING ""Id"";";
 
                 var parameters = new
                 {
-                    Name = Module.Name,
-                    Description = Module.Description,
-                    Code = Module.Code,
-                    Status = Module.Status
+                    Module.Name,
+                    Module.Description,
+                    Status = 1
                 };
 
                 Module.Id = await _context.ExecuteScalarAsync<int>(query, parameters);
-                Module.Status = 0; // Establece el estado de la Modulo (activo e inactivo)
+                Module.Status = 1;
+
                 return Module;
 
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, $"no se pudo agregar Modulea {Module}");
+                _logger.LogError(ex, $"no se pudo agregar Modulea {Module}");
                 throw;
             }
         }
 
+        // UPDATE
+        public async Task<bool> UpdateAsync(Module Module)
+        {
+                try
+                {
+                const string query = @"
+                                  UPDATE public.""Module""
+	                                SET ""Name""=@Name, ""Description""=@Description
+	                               WHERE ""Id""=@Id;";
 
-        // ============================= Create Module LINQ =============================
+                var parameters = new
+                {
+                    Module.Id,
+                    Module.Name,
+                    Module.Description
+                };
+
+                int rowsAffected = await _context.ExecuteAsync(query, parameters);
+                return rowsAffected > 0;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"No se pudo actualizar {Module}");
+                throw;
+
+            }
+        }
+
+        // DELETE PERSISTENT
+        public async Task<Object> DeletePersistentAsync(int id)
+        {
+            try
+            {
+                const string query = @"DELETE FROM public.""Module""
+                                        WHERE ""Id"" = @Id";
+                var parameters = new { Id = id };
+                var delete = await _context.ExecuteAsync(query, parameters);
+                return new { rowAfefects = delete };
+            }
+            catch (Exception ex)
+            {
+                _logger.LogInformation($" error al eliminar {ex.Message}");
+                return false;
+            }
+        }
+
+        // DELETE LOGICAL
+        public async Task<Object> DeleteLogicalAsync(int id)
+        {
+            try
+            {
+                const string query = @"UPDATE public.""Module""
+                                SET ""Status"" = 0
+                                WHERE ""Id"" = @Id;";
+
+                var parameters = new { Id = id };
+                var deleteLogical = await _context.ExecuteAsync(query, parameters);
+                return new { rowAfectes = deleteLogical };
+
+            }
+            catch (Exception ex)
+            {
+                _logger.LogInformation($"Error al realizar delete lógico: {ex.Message}");
+                return false;
+            }
+        }
+
+
+        //======================================______________  LINQ  ______________====================================== 
+
+        // SELECT ALL
+        public async Task<IEnumerable<Module>> GetAllAsyncLinq()
+        {
+            try
+            {
+                return await _context.Set<Module>()
+                .Where(p => p.Status == 1)
+                .ToListAsync();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogInformation(ex, "No se pudo obetner a las Moduleas");
+                throw;
+            }
+        }
+
+        // SELECT BY ID
+        public async Task<Module?> GetByIdAsyncLinq(int id)
+        {
+            try
+            {
+                return await _context.Set<Module>().FindAsync(id);
+
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error al traer una Modulea por id {id}");
+                throw;
+            }
+        }
+
+        // INSERT 
         public async Task<Module> CreateAsyncLinq(Module Module)
         {
             try
@@ -132,46 +198,12 @@ namespace Data
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, $"no se pudo agregar Modulea {Module}");
+                _logger.LogError(ex, $"no se pudo agregar Modulea {Module}");
                 throw;
             }
         }
 
-
-        // ============================= Update Module sql==================
-        public async Task<bool> UpdateAsync(Module Module)
-        {
-            try
-            {
-                const string query = @"
-                                    UPDATE Module
-                                    SET
-                                        Name = @Name,
-                                        Description = @Description,
-                                        code = @code,
-                                        Status = @Status,
-                                    WHERE Id = @Id; ";
-
-                var parameters = new
-                {
-                    Name = Module.Name,
-                    Description = Module.Description,
-                    Code = Module.Code,
-                    Status = Module.Status
-                };
-
-                int rowsAffected = await _context.ExecuteAsync(query, parameters);
-                return rowsAffected > 0;
-            }
-            catch (Exception ex)
-            {
-                logger.LogError(ex, $"No se pudo actualizar {Module}");
-                throw;
-
-            }
-        }
-
-        // ============================= Update Module LINQ =========================
+        // UPDATE
         public async Task<bool> UpdateAsyncLinq(Module Module)
         {
             try
@@ -182,35 +214,13 @@ namespace Data
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, $"No se pudo actualizar {Module}");
+                _logger.LogError(ex, $"No se pudo actualizar {Module}");
                 throw;
 
             }
         }
 
-
-        // ======================================================= Delte Persistent =======================================================
-
-        // ============================= Delte Module sql =========================
-        public async Task<bool> DeletePersistentAsync(int id)
-        {
-            try
-            {
-                const string query = @"DELETE FROM Module
-                                        WHERE Id = @Id";
-
-                var parameters = new { Id = id };
-                await _context.ExecuteAsync(query, parameters);
-                return true;
-            }
-            catch (Exception ex)
-            {
-                logger.LogInformation($" error al eliminar {ex.Message}");
-                return false;
-            }
-        }
-
-        // ============================= Delte Module LINQ =========================
+        // DELETE PERSISTENT
         public async Task<bool> DeletePersistentAsyncLinq(int id)
         {
             try
@@ -225,35 +235,12 @@ namespace Data
             }
             catch (Exception ex)
             {
-                logger.LogInformation($" error al eliminar {ex.Message}");
+                _logger.LogInformation($" error al eliminar {ex.Message}");
                 return false;
             }
         }
 
-
-        // ======================================================= Delte Logical =======================================================
-
-        // ============================= Delte Module  SQL =========================
-        public async Task<bool> DeleteLogicalAsync(int id)
-        {
-            try
-            {
-                const string query = @"UPDATE Module 
-                                        SET Status = 1 
-                                        WHERE Id = @Id";
-                var parameters = new { Id = id };
-                await _context.ExecuteAsync(query, parameters);
-                return true;
-            }
-            catch (Exception ex)
-            {
-                logger.LogInformation($"Error al realizar delete lógico: {ex.Message}");
-                return false;
-            }
-        }
-
-
-        // ============================= Delte Module  LINQ =========================
+        // DELETE LOGICAL
         public async Task<bool> DeleteLogicalAsyncLinq(int id)
         {
             try
@@ -268,7 +255,7 @@ namespace Data
             }
             catch (Exception ex)
             {
-                logger.LogInformation($"Error al realizar delete lógico con LINQ: {ex.Message}");
+                _logger.LogInformation($"Error al realizar delete lógico con LINQ: {ex.Message}");
                 return false;
             }
         }

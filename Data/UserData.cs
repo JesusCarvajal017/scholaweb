@@ -9,70 +9,170 @@ namespace Data
     public class UserData
     {
         private readonly ApplicationDbContext _context;
-        private readonly ILogger logger;
-        public UserData(ApplicationDbContext context, ILogger logger)
+        private readonly ILogger<UserData> _logger;
+        public UserData(ApplicationDbContext context, ILogger<UserData> logger)
         {
             _context = context;
-            this.logger = logger;
+            this._logger = logger;
         }
 
+        //======================================______________  SQL  ______________====================================== 
 
-        //====================================== consultas por medio de SQL ====================================== 
-
-        //Método para obtener todos los Useras con SQL
+        // SELECT ALL
         public async Task<IEnumerable<User>> GetAllAsync()
         {
             try
             {
-                const string query = "SELECT * FROM User WHERE Status = 0;";
+                const string query = @"SELECT * FROM ""user"" WHERE ""Status"" = 1
+                                        ORDER BY ""Id"" ASC;";
                 return await _context.QueryAsync<User>(query);
             }
             catch (Exception ex)
             {
-                logger.LogInformation(ex, "No se pudo obetner a las Useras");
+                _logger.LogInformation(ex, "No se pudo obetner a las Useras");
                 throw;
             }
+
         }
 
-
-        //Método para obtener por Id con SQL
+        // SELECT BY ID
         public async Task<User?> GetByIdAsync(int id)
         {
             try
             {
-                const string query = "SELECT * FROM User WHERE Id = @Id;";
+                const string query = @"SELECT * FROM public.""user"" WHERE ""Id"" = @Id;";
                 var parameters = new { Id = id };
                 return await _context.QueryFirstOrDefaultAsync<User>(query, parameters);
 
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, $"Error al traer una Usera por id {id}");
+                _logger.LogError(ex, $"Error al traer una Usera por id {id}");
                 throw;
             }
         }
 
+        // INSERT 
+        public async Task<User> CreateAsync(User User)
+        {
+            try
+            {
+                const string query = @"
+                           INSERT INTO public.""user""(
+	                            ""UserName"", ""Password"", ""Status"", ""PersonId"")
+	                       VALUES (@UserName, @Password, @Status, @PersonId)
+                            RETURNING ""Id"";";
 
-        //====================================== consultas por medio de LINQ ====================================== 
+                var parameters = new
+                {
+                    User.UserName,
+                    User.Password,
+                    User.PersonId,
+                    Status = 1
+                };
 
-        //Método para obtener todos los Useras con LINQ
+                User.Id = await _context.ExecuteScalarAsync<int>(query, parameters);
+                User.Status = 1;
+
+                return User;
+
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"no se pudo agregar User {User}");
+                throw;
+            }
+        }
+
+        // UPDATE
+        public async Task<bool> UpdateAsync(User User)
+        {
+            try
+            {
+                const string query = @"
+                                    UPDATE public.""user""
+	                                    SET ""UserName""=@UserName, 
+                                            ""Password""=@Password, 
+                                            ""PersonId""=@PersonId
+	                                WHERE ""Id"" = @Id;";
+
+                var parameters = new
+                {
+                    User.Id,
+                    User.UserName,
+                    User.Password,
+                    User.PersonId
+                };
+
+                int rowsAffected = await _context.ExecuteAsync(query, parameters);
+                return rowsAffected > 0;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"No se pudo actualizar {User}");
+                throw;
+
+            }
+        }
+
+        // DELETE PERSISTENT
+        public async Task<Object> DeletePersistentAsync(int id)
+        {
+            try
+            {
+                const string query = @"DELETE FROM ""user""
+                                        WHERE ""Id"" = @Id";
+                var parameters = new { Id = id };
+                var delete = await _context.ExecuteAsync(query, parameters);
+                return new { rowAfefects = delete };
+            }
+            catch (Exception ex)
+            {
+                _logger.LogInformation($" error al eliminar {ex.Message}");
+                return false;
+            }
+        }
+
+        // DELETE LOGICAL
+        public async Task<Object> DeleteLogicalAsync(int id)
+        {
+            try
+            {
+                const string query = @"UPDATE ""user"" 
+                                        SET ""Status"" = 0 
+                                        WHERE ""Id"" = @Id";
+                var parameters = new { Id = id };
+                var deleteLogical = await _context.ExecuteAsync(query, parameters);
+                return new { rowAfectes = deleteLogical };
+
+            }
+            catch (Exception ex)
+            {
+                _logger.LogInformation($"Error al realizar delete lógico: {ex.Message}");
+                return false;
+            }
+        }
+
+
+        //======================================______________  LINQ  ______________====================================== 
+
+        // SELECT ALL
         public async Task<IEnumerable<User>> GetAllAsyncLinq()
         {
             try
             {
                 return await _context.Set<User>()
-                .Where(p => p.Status == 0)
+                .Where(p => p.Status == 1)
                 .ToListAsync();
             }
             catch (Exception ex)
             {
-                logger.LogInformation(ex, "No se pudo obetner a las Useras");
+                _logger.LogInformation(ex, "No se pudo obetner a las Useras");
                 throw;
             }
         }
 
-
-        //Método para obtener por Id con LINQ
+        // SELECT BY ID
         public async Task<User?> GetByIdAsyncLinq(int id)
         {
             try
@@ -82,43 +182,12 @@ namespace Data
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, $"Error al traer una Usera por id {id}");
+                _logger.LogError(ex, $"Error al traer una Usera por id {id}");
                 throw;
             }
         }
 
-        // ============================= Create User SLQ =============================
-        public async Task<User> CreateAsync(User User)
-        {
-            try
-            {
-                const string query = @"
-                            INSERT INTO User (PersonId, UserName,Password, Status)
-                            OUTPUT INSERTED.Id
-                            VALUES (@PersonId,@UserName, @Password, @@Status);";
-
-                var parameters = new
-                {
-                    PersonId = User.PersonId,
-                    UserName = User.UserName,
-                    Password = User.Password,
-                    Status = User.Status
-                };
-
-                User.Id = await _context.ExecuteScalarAsync<int>(query, parameters);
-                User.Status = 0; // Establece el estado de la User (activo e inactivo)
-                return User;
-
-            }
-            catch (Exception ex)
-            {
-                logger.LogError(ex, $"no se pudo agregar Usera {User}");
-                throw;
-            }
-        }
-
-
-        // ============================= Create User LINQ =============================
+        // INSERT 
         public async Task<User> CreateAsyncLinq(User User)
         {
             try
@@ -131,44 +200,12 @@ namespace Data
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, $"no se pudo agregar Usera {User}");
+                _logger.LogError(ex, $"no se pudo agregar Usera {User}");
                 throw;
             }
         }
 
-
-        // ============================= Update User sql==================
-        public async Task<bool> UpdateAsync(User User)
-        {
-            try
-            {
-                const string query = @"
-                                    UPDATE User
-                                    SET
-                                        UserName = @UserName,
-                                        Password = @Password,
-                                        Status = @Status
-                                    WHERE Id = @Id; ";
-
-                var parameters = new
-                {
-                    UserName = User.UserName,
-                    Password = User.Password,
-                    Status = User.Status
-                };
-
-                int rowsAffected = await _context.ExecuteAsync(query, parameters);
-                return rowsAffected > 0;
-            }
-            catch (Exception ex)
-            {
-                logger.LogError(ex, $"No se pudo actualizar {User}");
-                throw;
-
-            }
-        }
-
-        // ============================= Update User LINQ =========================
+        // UPDATE
         public async Task<bool> UpdateAsyncLinq(User User)
         {
             try
@@ -179,35 +216,13 @@ namespace Data
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, $"No se pudo actualizar {User}");
+                _logger.LogError(ex, $"No se pudo actualizar {User}");
                 throw;
 
             }
         }
 
-
-        // ======================================================= Delte Persistent =======================================================
-
-        // ============================= Delte User sql =========================
-        public async Task<bool> DeletePersistentAsync(int id)
-        {
-            try
-            {
-                const string query = @"DELETE FROM User
-                                        WHERE Id = @Id";
-
-                var parameters = new { Id = id };
-                await _context.ExecuteAsync(query, parameters);
-                return true;
-            }
-            catch (Exception ex)
-            {
-                logger.LogInformation($" error al eliminar {ex.Message}");
-                return false;
-            }
-        }
-
-        // ============================= Delte User LINQ =========================
+        // DELETE PERSISTENT
         public async Task<bool> DeletePersistentAsyncLinq(int id)
         {
             try
@@ -222,35 +237,12 @@ namespace Data
             }
             catch (Exception ex)
             {
-                logger.LogInformation($" error al eliminar {ex.Message}");
+                _logger.LogInformation($" error al eliminar {ex.Message}");
                 return false;
             }
         }
 
-
-        // ======================================================= Delte Logical =======================================================
-
-        // ============================= Delte User  =========================
-        public async Task<bool> DeleteLogicalAsync(int id)
-        {
-            try
-            {
-                const string query = @"UPDATE User 
-                                        SET Status = 1 
-                                        WHERE Id = @Id";
-                var parameters = new { Id = id };
-                await _context.ExecuteAsync(query, parameters);
-                return true;
-            }
-            catch (Exception ex)
-            {
-                logger.LogInformation($"Error al realizar delete lógico: {ex.Message}");
-                return false;
-            }
-        }
-
-
-        //Método para Eliminar lógico linq
+        // DELETE LOGICAL
         public async Task<bool> DeleteLogicalAsyncLinq(int id)
         {
             try
@@ -265,7 +257,7 @@ namespace Data
             }
             catch (Exception ex)
             {
-                logger.LogInformation($"Error al realizar delete lógico con LINQ: {ex.Message}");
+                _logger.LogInformation($"Error al realizar delete lógico con LINQ: {ex.Message}");
                 return false;
             }
         }

@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Entity.Model
+﻿namespace Entity.Model
 {
     public class Form
     {
@@ -12,6 +6,10 @@ namespace Entity.Model
         public string Name { get; set; }    
         public string Description { get; set; }
 
-        public int Status { get; set; }   
+        public int Status { get; set; }
+
+        public ICollection<RolFormPermission> RolFormPermissions { get; set; }
+
+        public ICollection<ModuleForm> ModuleForm { get; set; }
     }
 }
