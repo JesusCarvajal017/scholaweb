@@ -1,11 +1,10 @@
-﻿
-using Entity;
+﻿using Entity;
 using Entity.DTOs;
 using Entity.Model;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
-namespace Data
+namespace Data.repositories.Global
 {
     public class UserRolData
     {
@@ -14,7 +13,7 @@ namespace Data
         public UserRolData(ApplicationDbContext context, ILogger<UserRolData> logger)
         {
             _context = context;
-            this._logger = logger;
+            _logger = logger;
         }
 
         //======================================______________  SQL  ______________====================================== 
@@ -32,7 +31,7 @@ namespace Data
 	                                        ON ur.""RolId"" = rl.""Id""
                                         ORDER BY ur.""Id"" ASC;";
 
-                
+
 
                 return await _context.QueryAsync<UserRolQueryDto>(query);
             }
@@ -125,7 +124,7 @@ namespace Data
         }
 
         // DELETE PERSISTENT
-        public async Task<Object> DeletePersistentAsync(int id)
+        public async Task<object> DeletePersistentAsync(int id)
         {
             try
             {
@@ -143,7 +142,7 @@ namespace Data
         }
 
         // DELETE LOGICAL
-        public async Task<Object> DeleteLogicalAsync(int id)
+        public async Task<object> DeleteLogicalAsync(int id)
         {
             try
             {

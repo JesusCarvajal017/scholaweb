@@ -1,16 +1,21 @@
-﻿
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using Data.interfaces;
 using Entity;
 using Entity.Model;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
-namespace Data
+namespace Data.repositories.SqlServer
 {
-    public class PermissionData
+    public class UserDataSv : IGlobalCrud<User>
     {
         private readonly ApplicationDbContext _context;
-        private readonly ILogger<PermissionData> _logger;
-        public PermissionData(ApplicationDbContext context, ILogger<PermissionData> logger)
+        private readonly ILogger<UserDataSv> _logger;
+        public UserDataSv(ApplicationDbContext context, ILogger<UserDataSv> logger)
         {
             _context = context;
             this._logger = logger;
@@ -19,83 +24,88 @@ namespace Data
         //======================================______________  SQL  ______________====================================== 
 
         // SELECT ALL
-        public async Task<IEnumerable<Permission>> GetAllAsync()
+        public async Task<IEnumerable<User>> GetAllAsync()
         {
             try
             {
-                const string query = @"SELECT * FROM Permission WHERE ""Status"" = 1
-                                        ORDER BY ""Id"" ASC ;";
-                return await _context.QueryAsync<Permission>(query);
+                const string query = @"SELECT * FROM [User] WHERE [Status] = 1";
+                return await _context.QueryAsync<User>(query);
             }
             catch (Exception ex)
             {
-                _logger.LogInformation(ex, "No se pudo obetner a los permisos");
+                _logger.LogInformation(ex, "No se pudo obetner a las Useras");
                 throw;
             }
+
         }
 
         // SELECT BY ID
-        public async Task<Permission?> GetByIdAsync(int id)
+        public async Task<User?> GetByIdAsync(int id)
         {
             try
             {
-                const string query = @"SELECT * FROM Permission WHERE ""Id"" = @Id;";
+                const string query = @"SELECT * FROM public.""user"" WHERE ""Id"" = @Id;";
                 var parameters = new { Id = id };
-                return await _context.QueryFirstOrDefaultAsync<Permission>(query, parameters);
+                return await _context.QueryFirstOrDefaultAsync<User>(query, parameters);
 
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"Error al traer una Permissiona por id {id}");
+                _logger.LogError(ex, $"Error al traer una Usera por id {id}");
                 throw;
             }
         }
 
         // INSERT 
-        public async Task<Permission> CreateAsync(Permission Permission)
+        public async Task<User> CreateAsync(User User)
         {
             try
             {
                 const string query = @"
-                           INSERT INTO public.permission(
-	                        ""Name"", ""Description"", ""Status"")
-	                        VALUES (@Name, @Description, @Status);";
+                           INSERT INTO public.""user""(
+	                            ""UserName"", ""Password"", ""Status"", ""PersonId"")
+	                       VALUES (@UserName, @Password, @Status, @PersonId)
+                            RETURNING ""Id"";";
 
                 var parameters = new
                 {
-                    Permission.Name,
-                    Permission.Description,
+                    User.UserName,
+                    User.Password,
+                    User.PersonId,
                     Status = 1
                 };
 
-                Permission.Id = await _context.ExecuteScalarAsync<int>(query, parameters);
-                Permission.Status = 1;
+                User.Id = await _context.ExecuteScalarAsync<int>(query, parameters);
+                User.Status = 1;
 
-                return Permission;
+                return User;
 
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"no se pudo agregar Permissiona {Permission}");
+                _logger.LogError(ex, $"no se pudo agregar User {User}");
                 throw;
             }
         }
 
         // UPDATE
-        public async Task<bool> UpdateAsync(Permission Permission)
+        public async Task<bool> UpdateAsync(User User)
         {
             try
             {
                 const string query = @"
-                                  UPDATE public.permission
-	                                SET ""Name""=@Name, ""Description""=@Description
-	                                WHERE ""Id""=@Id;";
+                                    UPDATE public.""user""
+	                                    SET ""UserName""=@UserName, 
+                                            ""Password""=@Password, 
+                                            ""PersonId""=@PersonId
+	                                WHERE ""Id"" = @Id;";
 
                 var parameters = new
                 {
-                    Permission.Id,
-                    Permission.Name,
-                    Permission.Description
+                    User.Id,
+                    User.UserName,
+                    User.Password,
+                    User.PersonId
                 };
 
                 int rowsAffected = await _context.ExecuteAsync(query, parameters);
@@ -103,7 +113,7 @@ namespace Data
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"No se pudo actualizar {Permission}");
+                _logger.LogError(ex, $"No se pudo actualizar {User}");
                 throw;
 
             }
@@ -114,7 +124,7 @@ namespace Data
         {
             try
             {
-                const string query = @"DELETE FROM Permission
+                const string query = @"DELETE FROM ""user""
                                         WHERE ""Id"" = @Id";
                 var parameters = new { Id = id };
                 var delete = await _context.ExecuteAsync(query, parameters);
@@ -132,7 +142,7 @@ namespace Data
         {
             try
             {
-                const string query = @"UPDATE Permission 
+                const string query = @"UPDATE ""user"" 
                                         SET ""Status"" = 0 
                                         WHERE ""Id"" = @Id";
                 var parameters = new { Id = id };
@@ -151,66 +161,66 @@ namespace Data
         //======================================______________  LINQ  ______________====================================== 
 
         // SELECT ALL
-        public async Task<IEnumerable<Permission>> GetAllAsyncLinq()
+        public async Task<IEnumerable<User>> GetAllAsyncLinq()
         {
             try
             {
-                return await _context.Set<Permission>()
+                return await _context.Set<User>()
                 .Where(p => p.Status == 1)
                 .ToListAsync();
             }
             catch (Exception ex)
             {
-                _logger.LogInformation(ex, "No se pudo obetner a las Permissionas");
+                _logger.LogInformation(ex, "No se pudo obetner a las Useras");
                 throw;
             }
         }
 
         // SELECT BY ID
-        public async Task<Permission?> GetByIdAsyncLinq(int id)
+        public async Task<User?> GetByIdAsyncLinq(int id)
         {
             try
             {
-                return await _context.Set<Permission>().FindAsync(id);
+                return await _context.Set<User>().FindAsync(id);
 
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"Error al traer una Permissiona por id {id}");
+                _logger.LogError(ex, $"Error al traer una Usera por id {id}");
                 throw;
             }
         }
 
         // INSERT 
-        public async Task<Permission> CreateAsyncLinq(Permission Permission)
+        public async Task<User> CreateAsyncLinq(User User)
         {
             try
             {
-                Permission.Status = 0; // Establece el estado de la Permissiona (activo e inactivo)
-                await _context.Set<Permission>().AddAsync(Permission);
+                User.Status = 0; // Establece el estado de la Usera (activo e inactivo)
+                await _context.Set<User>().AddAsync(User);
                 await _context.SaveChangesAsync();
-                return Permission;
+                return User;
 
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"no se pudo agregar Permissiona {Permission}");
+                _logger.LogError(ex, $"no se pudo agregar Usera {User}");
                 throw;
             }
         }
 
         // UPDATE
-        public async Task<bool> UpdateAsyncLinq(Permission Permission)
+        public async Task<bool> UpdateAsyncLinq(User User)
         {
             try
             {
-                _context.Set<Permission>().Update(Permission);
+                _context.Set<User>().Update(User);
                 await _context.SaveChangesAsync();
                 return true;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"No se pudo actualizar {Permission}");
+                _logger.LogError(ex, $"No se pudo actualizar {User}");
                 throw;
 
             }
@@ -221,11 +231,11 @@ namespace Data
         {
             try
             {
-                var Delete = await _context.Set<Permission>().FindAsync(id);
+                var Delete = await _context.Set<User>().FindAsync(id);
 
                 if (Delete == null) return false; // usuario inexistente
 
-                _context.Set<Permission>().Remove(Delete);
+                _context.Set<User>().Remove(Delete);
                 await _context.SaveChangesAsync();
                 return true;
             }
@@ -241,7 +251,7 @@ namespace Data
         {
             try
             {
-                var entity = await _context.Set<Permission>().FindAsync(id);
+                var entity = await _context.Set<User>().FindAsync(id);
                 if (entity == null) return false; // usuario inexistente
 
                 // Marcar como eliminado
@@ -255,6 +265,5 @@ namespace Data
                 return false;
             }
         }
-
     }
 }

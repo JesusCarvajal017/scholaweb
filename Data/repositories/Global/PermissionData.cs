@@ -1,104 +1,100 @@
-﻿
-using System.Collections.Generic;
-using Entity;
+﻿using Entity;
 using Entity.Model;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
-namespace Data
+namespace Data.repositories.Global
 {
-    public class ModuleData
+    public class PermissionData
     {
         private readonly ApplicationDbContext _context;
-        private readonly ILogger<ModuleData> _logger;
-        public ModuleData(ApplicationDbContext context, ILogger<ModuleData> logger)
+        private readonly ILogger<PermissionData> _logger;
+        public PermissionData(ApplicationDbContext context, ILogger<PermissionData> logger)
         {
             _context = context;
-            this._logger = logger;
+            _logger = logger;
         }
 
         //======================================______________  SQL  ______________====================================== 
 
         // SELECT ALL
-        public async Task<IEnumerable<Module>> GetAllAsync()
+        public async Task<IEnumerable<Permission>> GetAllAsync()
         {
             try
             {
-                const string query = @"SELECT * FROM ""Module"" WHERE ""Status"" = 1
+                const string query = @"SELECT * FROM Permission WHERE ""Status"" = 1
                                         ORDER BY ""Id"" ASC ;";
-                return await _context.QueryAsync<Module>(query);
+                return await _context.QueryAsync<Permission>(query);
             }
             catch (Exception ex)
             {
-                _logger.LogInformation(ex, "No se pudo obetner a las Moduleas");
+                _logger.LogInformation(ex, "No se pudo obetner a los permisos");
                 throw;
             }
         }
 
         // SELECT BY ID
-        public async Task<Module?> GetByIdAsync(int id)
+        public async Task<Permission?> GetByIdAsync(int id)
         {
             try
             {
-                const string query = @"SELECT * FROM public.""Module"" WHERE ""Id"" = @Id;";
+                const string query = @"SELECT * FROM Permission WHERE ""Id"" = @Id;";
                 var parameters = new { Id = id };
-                return await _context.QueryFirstOrDefaultAsync<Module>(query, parameters);
+                return await _context.QueryFirstOrDefaultAsync<Permission>(query, parameters);
 
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"Error al traer una Modulea por id {id}");
+                _logger.LogError(ex, $"Error al traer una Permissiona por id {id}");
                 throw;
             }
         }
 
         // INSERT 
-        public async Task<Module> CreateAsync(Module Module)
+        public async Task<Permission> CreateAsync(Permission Permission)
         {
             try
             {
                 const string query = @"
-            
-                            INSERT INTO public.""Module""(
-	                            ""Name"", ""Description"", ""Status"")
-	                            VALUES (@Name, @Description, @Status)
-                            RETURNING ""Id"";";
+                           INSERT INTO public.permission(
+	                        ""Name"", ""Description"", ""Status"")
+	                        VALUES (@Name, @Description, @Status);";
 
                 var parameters = new
                 {
-                    Module.Name,
-                    Module.Description,
+                    Permission.Name,
+                    Permission.Description,
                     Status = 1
                 };
 
-                Module.Id = await _context.ExecuteScalarAsync<int>(query, parameters);
-                Module.Status = 1;
+                Permission.Id = await _context.ExecuteScalarAsync<int>(query, parameters);
+                Permission.Status = 1;
 
-                return Module;
+                return Permission;
 
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"no se pudo agregar Modulea {Module}");
+                _logger.LogError(ex, $"no se pudo agregar Permissiona {Permission}");
                 throw;
             }
         }
 
         // UPDATE
-        public async Task<bool> UpdateAsync(Module Module)
+        public async Task<bool> UpdateAsync(Permission Permission)
         {
-                try
-                {
+            try
+            {
                 const string query = @"
-                                  UPDATE public.""Module""
+                                  UPDATE public.permission
 	                                SET ""Name""=@Name, ""Description""=@Description
-	                               WHERE ""Id""=@Id;";
+	                                WHERE ""Id""=@Id;";
 
                 var parameters = new
                 {
-                    Module.Id,
-                    Module.Name,
-                    Module.Description
+                    Permission.Id,
+                    Permission.Name,
+                    Permission.Description
                 };
 
                 int rowsAffected = await _context.ExecuteAsync(query, parameters);
@@ -106,18 +102,18 @@ namespace Data
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"No se pudo actualizar {Module}");
+                _logger.LogError(ex, $"No se pudo actualizar {Permission}");
                 throw;
 
             }
         }
 
         // DELETE PERSISTENT
-        public async Task<Object> DeletePersistentAsync(int id)
+        public async Task<object> DeletePersistentAsync(int id)
         {
             try
             {
-                const string query = @"DELETE FROM public.""Module""
+                const string query = @"DELETE FROM Permission
                                         WHERE ""Id"" = @Id";
                 var parameters = new { Id = id };
                 var delete = await _context.ExecuteAsync(query, parameters);
@@ -131,14 +127,13 @@ namespace Data
         }
 
         // DELETE LOGICAL
-        public async Task<Object> DeleteLogicalAsync(int id)
+        public async Task<object> DeleteLogicalAsync(int id)
         {
             try
             {
-                const string query = @"UPDATE public.""Module""
-                                SET ""Status"" = 0
-                                WHERE ""Id"" = @Id;";
-
+                const string query = @"UPDATE Permission 
+                                        SET ""Status"" = 0 
+                                        WHERE ""Id"" = @Id";
                 var parameters = new { Id = id };
                 var deleteLogical = await _context.ExecuteAsync(query, parameters);
                 return new { rowAfectes = deleteLogical };
@@ -155,66 +150,66 @@ namespace Data
         //======================================______________  LINQ  ______________====================================== 
 
         // SELECT ALL
-        public async Task<IEnumerable<Module>> GetAllAsyncLinq()
+        public async Task<IEnumerable<Permission>> GetAllAsyncLinq()
         {
             try
             {
-                return await _context.Set<Module>()
+                return await _context.Set<Permission>()
                 .Where(p => p.Status == 1)
                 .ToListAsync();
             }
             catch (Exception ex)
             {
-                _logger.LogInformation(ex, "No se pudo obetner a las Moduleas");
+                _logger.LogInformation(ex, "No se pudo obetner a las Permissionas");
                 throw;
             }
         }
 
         // SELECT BY ID
-        public async Task<Module?> GetByIdAsyncLinq(int id)
+        public async Task<Permission?> GetByIdAsyncLinq(int id)
         {
             try
             {
-                return await _context.Set<Module>().FindAsync(id);
+                return await _context.Set<Permission>().FindAsync(id);
 
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"Error al traer una Modulea por id {id}");
+                _logger.LogError(ex, $"Error al traer una Permissiona por id {id}");
                 throw;
             }
         }
 
         // INSERT 
-        public async Task<Module> CreateAsyncLinq(Module Module)
+        public async Task<Permission> CreateAsyncLinq(Permission Permission)
         {
             try
             {
-                Module.Status = 0; // Establece el estado de la Modulea (activo e inactivo)
-                await _context.Set<Module>().AddAsync(Module);
+                Permission.Status = 0; // Establece el estado de la Permissiona (activo e inactivo)
+                await _context.Set<Permission>().AddAsync(Permission);
                 await _context.SaveChangesAsync();
-                return Module;
+                return Permission;
 
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"no se pudo agregar Modulea {Module}");
+                _logger.LogError(ex, $"no se pudo agregar Permissiona {Permission}");
                 throw;
             }
         }
 
         // UPDATE
-        public async Task<bool> UpdateAsyncLinq(Module Module)
+        public async Task<bool> UpdateAsyncLinq(Permission Permission)
         {
             try
             {
-                _context.Set<Module>().Update(Module);
+                _context.Set<Permission>().Update(Permission);
                 await _context.SaveChangesAsync();
                 return true;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"No se pudo actualizar {Module}");
+                _logger.LogError(ex, $"No se pudo actualizar {Permission}");
                 throw;
 
             }
@@ -225,11 +220,11 @@ namespace Data
         {
             try
             {
-                var Delete = await _context.Set<Module>().FindAsync(id);
+                var Delete = await _context.Set<Permission>().FindAsync(id);
 
                 if (Delete == null) return false; // usuario inexistente
 
-                _context.Set<Module>().Remove(Delete);
+                _context.Set<Permission>().Remove(Delete);
                 await _context.SaveChangesAsync();
                 return true;
             }
@@ -245,7 +240,7 @@ namespace Data
         {
             try
             {
-                var entity = await _context.Set<Module>().FindAsync(id);
+                var entity = await _context.Set<Permission>().FindAsync(id);
                 if (entity == null) return false; // usuario inexistente
 
                 // Marcar como eliminado

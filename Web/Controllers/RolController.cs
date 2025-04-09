@@ -1,4 +1,4 @@
-﻿using Business;
+﻿using Business.services;
 using Entity.DTOs;
 using Microsoft.AspNetCore.Mvc;
 using Utilities.Exeptions;
@@ -29,7 +29,7 @@ namespace Web.Controllers
         {
             try
             {
-                var Rols = await _RolBusiness.GetAllRolesAsync();
+                var Rols = await _RolBusiness.GetAllAsync();
                 return Ok(Rols);
             }
             catch (ExternalServiceException ex)
@@ -49,7 +49,7 @@ namespace Web.Controllers
         {
             try
             {
-                var Rol = await _RolBusiness.GetRolByIdAsync(id);
+                var Rol = await _RolBusiness.GetByIdAsync(id);
                 return Ok(Rol);
             }
             catch (ValidationException ex)
@@ -78,7 +78,7 @@ namespace Web.Controllers
         {
             try
             {
-                var createdRol = await _RolBusiness.CreateRolAsync(RolDto);
+                var createdRol = await _RolBusiness.CreateAsync(RolDto);
                 return CreatedAtAction(nameof(GetRolById), new { id = createdRol.Id }, createdRol);
             }
             catch (ValidationException ex) 
@@ -104,7 +104,7 @@ namespace Web.Controllers
         {
             try
             {
-                var update = await _RolBusiness.UpdateRolAsync(RolDto);
+                var update = await _RolBusiness.UpdateAsync(RolDto);
                 return Ok(update);
             }
             catch (ValidationException ex)
@@ -125,35 +125,35 @@ namespace Web.Controllers
         }
 
         // DELETE => LOGICAL
-        [HttpPut("logical/{id}")]
-        [ProducesResponseType(typeof(Object), 200)]
-        [ProducesResponseType(204)]
-        [ProducesResponseType(400)]
-        [ProducesResponseType(404)]
-        [ProducesResponseType(500)]
-        public async Task<IActionResult> DeletleRol(int id)
-        {
-            try
-            {
-                var response = await _RolBusiness.DeletelogicaRollAsync(id);
-                return Ok(response); 
-            }
-            catch (ValidationException ex)
-            {
-                _logger.LogWarning(ex, "Validación fallida al eliminar el rol con ID: {RolId}", id);
-                return BadRequest(new { message = ex.Message });
-            }
-            catch (EntityNotFoundException ex)
-            {
-                _logger.LogInformation(ex, "Rol no encontrado con ID: {RolId}", id);
-                return NotFound(new { message = ex.Message });
-            }
-            catch (ExternalServiceException ex)
-            {
-                _logger.LogError(ex, "Error al eliminar el rol con ID: {RolId}", id);
-                return StatusCode(500, new { message = ex.Message });
-            }
-        }
+        //[HttpPut("logical/{id}")]
+        //[ProducesResponseType(typeof(Object), 200)]
+        //[ProducesResponseType(204)]
+        //[ProducesResponseType(400)]
+        //[ProducesResponseType(404)]
+        //[ProducesResponseType(500)]
+        //public async Task<IActionResult> DeletleRol(int id)
+        //{
+        //    try
+        //    {
+        //        var response = await _RolBusiness.DeletelogicaRollAsync(id);
+        //        return Ok(response); 
+        //    }
+        //    catch (ValidationException ex)
+        //    {
+        //        _logger.LogWarning(ex, "Validación fallida al eliminar el rol con ID: {RolId}", id);
+        //        return BadRequest(new { message = ex.Message });
+        //    }
+        //    catch (EntityNotFoundException ex)
+        //    {
+        //        _logger.LogInformation(ex, "Rol no encontrado con ID: {RolId}", id);
+        //        return NotFound(new { message = ex.Message });
+        //    }
+        //    catch (ExternalServiceException ex)
+        //    {
+        //        _logger.LogError(ex, "Error al eliminar el rol con ID: {RolId}", id);
+        //        return StatusCode(500, new { message = ex.Message });
+        //    }
+        //}
 
         // DELETE => PERSISTENT
         [HttpDelete("{id}")]
@@ -166,7 +166,7 @@ namespace Web.Controllers
         {
             try
             {
-                var response = await _RolBusiness.DeletePersistenRolAsync(id);
+                var response = await _RolBusiness.DeleteAsync(id);
                 return Ok(response); // Código 204: Eliminación exitosa sin contenido
             }
             catch (ValidationException ex)

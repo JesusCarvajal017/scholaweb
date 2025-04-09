@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Data;
+using Data.repositories.Global;
 using Entity.DTOs;
 using Entity.Model;
 using Microsoft.Extensions.Logging;

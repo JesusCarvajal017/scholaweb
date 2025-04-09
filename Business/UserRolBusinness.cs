@@ -1,4 +1,4 @@
-﻿using Data;
+﻿using Data.repositories.Global;
 using Entity.DTOs;
 using Entity.Model;
 using Microsoft.Extensions.Logging;

@@ -8,8 +8,8 @@
 
         public int Status { get; set; }
 
-        public ICollection<RolFormPermission> RolFormPermissions { get; set; }
+        //public ICollection<RolFormPermission> RolFormPermissions { get; set; }
 
-        public ICollection<ModuleForm> ModuleForm { get; set; }
+        //public ICollection<ModuleForm> ModuleForm { get; set; }
     }
 }

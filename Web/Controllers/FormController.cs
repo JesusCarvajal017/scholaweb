@@ -1,4 +1,4 @@
-﻿using Business;
+﻿using Business.services;
 using Entity.DTOs;
 using Microsoft.AspNetCore.Mvc;
 using Utilities.Exeptions;
@@ -29,7 +29,7 @@ namespace Web.Controllers
         {
             try
             {
-                var Forms = await _FormBusiness.GetAllFormesAsync();
+                var Forms = await _FormBusiness.GetAllAsync();
                 return Ok(Forms);
             }
             catch (ExternalServiceException ex)
@@ -49,7 +49,7 @@ namespace Web.Controllers
         {
             try
             {
-                var Form = await _FormBusiness.GetByIdFormAsync(id);
+                var Form = await _FormBusiness.GetByIdAsync(id);
                 return Ok(Form);
             }
             catch (ValidationException ex)
@@ -78,7 +78,7 @@ namespace Web.Controllers
         {
             try
             {
-                var createdForm = await _FormBusiness.CreateFormAsync(FormDto);
+                var createdForm = await _FormBusiness.CreateAsync(FormDto);
                 return CreatedAtAction(nameof(GetFormById), new { id = createdForm.Id }, createdForm);
             }
             catch (ValidationException ex)
@@ -104,7 +104,7 @@ namespace Web.Controllers
         {
             try
             {
-                var update = await _FormBusiness.UpdateFormAsync(FormDto);
+                var update = await _FormBusiness.UpdateAsync(FormDto);
                 return Ok(update);
             }
             catch (ValidationException ex)
@@ -124,36 +124,36 @@ namespace Web.Controllers
             }
         }
 
-        // DELETE => LOGICAL
-        [HttpPut("logical/{id}")]
-        [ProducesResponseType(typeof(Object), 200)]
-        [ProducesResponseType(204)]
-        [ProducesResponseType(400)]
-        [ProducesResponseType(404)]
-        [ProducesResponseType(500)]
-        public async Task<IActionResult> DeletleForm(int id)
-        {
-            try
-            {
-                var response = await _FormBusiness.DeletelogicaFormlAsync(id);
-                return Ok(response);
-            }
-            catch (ValidationException ex)
-            {
-                _logger.LogWarning(ex, "Validación fallida al eliminar el form con ID: {FormId}", id);
-                return BadRequest(new { message = ex.Message });
-            }
-            catch (EntityNotFoundException ex)
-            {
-                _logger.LogInformation(ex, "Form no encontrado con ID: {FormId}", id);
-                return NotFound(new { message = ex.Message });
-            }
-            catch (ExternalServiceException ex)
-            {
-                _logger.LogError(ex, "Error al eliminar el form con ID: {FormId}", id);
-                return StatusCode(500, new { message = ex.Message });
-            }
-        }
+        //// DELETE => LOGICAL
+        //[HttpPut("logical/{id}")]
+        //[ProducesResponseType(typeof(Object), 200)]
+        //[ProducesResponseType(204)]
+        //[ProducesResponseType(400)]
+        //[ProducesResponseType(404)]
+        //[ProducesResponseType(500)]
+        //public async Task<IActionResult> DeletleForm(int id)
+        //{
+        //    try
+        //    {
+        //        var response = await _FormBusiness.DeletelogicaFormlAsync(id);
+        //        return Ok(response);
+        //    }
+        //    catch (ValidationException ex)
+        //    {
+        //        _logger.LogWarning(ex, "Validación fallida al eliminar el form con ID: {FormId}", id);
+        //        return BadRequest(new { message = ex.Message });
+        //    }
+        //    catch (EntityNotFoundException ex)
+        //    {
+        //        _logger.LogInformation(ex, "Form no encontrado con ID: {FormId}", id);
+        //        return NotFound(new { message = ex.Message });
+        //    }
+        //    catch (ExternalServiceException ex)
+        //    {
+        //        _logger.LogError(ex, "Error al eliminar el form con ID: {FormId}", id);
+        //        return StatusCode(500, new { message = ex.Message });
+        //    }
+        //}
 
         // DELETE => PERSISTENT
         [HttpDelete("{id}")]
@@ -166,7 +166,7 @@ namespace Web.Controllers
         {
             try
             {
-                var response = await _FormBusiness.DeletePersistenFormAsync(id);
+                var response = await _FormBusiness.DeleteAsync(id);
                 return Ok(response); // Código 204: Eliminación exitosa sin contenido
             }
             catch (ValidationException ex)

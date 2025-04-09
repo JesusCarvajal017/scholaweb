@@ -1,15 +1,22 @@
-﻿using Entity;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using Data.interfaces;
+using Data.repositories.posgrest;
+using Entity;
 using Entity.Model;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
-namespace Data
+namespace Data.repositories.SqlServer
 {
-    public class RolData
+    public class PersonDataSv : IGlobalCrud<Person>
     {
         private readonly ApplicationDbContext _context;
-        private readonly ILogger<RolData> _logger;
-        public RolData(ApplicationDbContext context, ILogger<RolData> logger)
+        private readonly ILogger<PersonDataSv> _logger;
+        public PersonDataSv(ApplicationDbContext context, ILogger<PersonDataSv> logger)
         {
             _context = context;
             this._logger = logger;
@@ -18,93 +25,109 @@ namespace Data
         //======================================______________  SQL  ______________====================================== 
 
         // SELECT ALL
-        public async Task<IEnumerable<Rol>> GetAllAsync()
+        public async Task<IEnumerable<Person>> GetAllAsync()
         {
             try
             {
-                const string query = @"SELECT * FROM rol WHERE ""Status"" = 1
-                                        ORDER BY ""Id"" ASC ;";
-                return await _context.QueryAsync<Rol>(query);
+                const string query = @"SELECT * FROM [Person] WHERE [Status] = 1";
+
+                return await _context.QueryAsync<Person>(query);
+
             }
             catch (Exception ex)
             {
-                _logger.LogInformation(ex, "No se pudo obetner a las Rolas");
+                _logger.LogInformation(ex, "No se pudo obetner a las Personas");
                 throw;
             }
         }
 
         // SELECT BY ID
-        public async Task<Rol?> GetByIdAsync(int id)
+        public async Task<Person?> GetByIdAsync(int id)
         {
             try
             {
-                const string query = @"SELECT * FROM rol WHERE ""Id"" = @Id;";
+                const string query = @"SELECT * FROM public.""Person"" WHERE ""Id"" = @Id;";
+
                 var parameters = new { Id = id };
-                return await _context.QueryFirstOrDefaultAsync<Rol>(query, parameters);
+
+                return await _context.QueryFirstOrDefaultAsync<Person>(query, parameters);
+
 
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"Error al traer una Rola por id {id}");
+                _logger.LogError(ex, $"Error al traer una Persona por id {id}");
                 throw;
             }
         }
 
         // INSERT 
-        public async Task<Rol> CreateAsync(Rol Rol)
+        public async Task<Person> CreateAsync(Person Person) // { }
         {
             try
             {
                 const string query = @"
-                            INSERT INTO Rol (""Name"", ""Description"", ""Status"")
-                                VALUES (@Name, @Description, @Status)
+                            INSERT INTO public.""Person""(
+	                            ""Name"", ""LastName"", ""Email"", ""Identification"", ""Age"", ""Status"")
+	                            VALUES (@Name, @LastNamee, @Email, @Identification, @Age, @Status)
                             RETURNING ""Id"";";
 
                 var parameters = new
                 {
-                    Name = Rol.Name,
-                    Description = Rol.Description,
+                    Name = Person.Name,
+                    LastNamee = Person.LastName,
+                    Person.Email,
+                    Person.Identification,
+                    Person.Age,
                     Status = 1
                 };
 
-                Rol.Id = await _context.ExecuteScalarAsync<int>(query, parameters);
-                Rol.Status = 1;
+                Person.Id = await _context.ExecuteScalarAsync<int>(query, parameters);
+                Person.Status = 1;
 
-                return Rol;
+                return Person;
+
+                // { }
 
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"no se pudo agregar Rola {Rol}");
+                _logger.LogError(ex, $"no se pudo agregar Persona {Person}");
                 throw;
             }
         }
 
         // UPDATE
-        public async Task<bool> UpdateAsync(Rol Rol)
+        public async Task<bool> UpdateAsync(Person Person) // <= { Id = 1, Name = "hola"}
         {
             try
             {
                 const string query = @"
-                                    UPDATE Rol
-                                    SET
-                                        ""Name"" = @Name,
-                                        ""Description"" = @Description
-                                    WHERE ""Id"" = @Id; ";
+                                  UPDATE public.""Person""
+	                                SET ""Name""=@Name, 
+                                        ""LastName""=@LastName, 
+                                        ""Email""=@Email, 
+                                        ""Identification""=@Identification, 
+                                        ""Age""=@Age
+	                               WHERE ""Id"" = @Id;";
 
                 var parameters = new
                 {
-                    Id = Rol.Id,
-                    Name = Rol.Name,
-                    Description = Rol.Description,
+                    Person.Id,
+                    Person.Name,
+                    Person.LastName,
+                    Person.Email,
+                    Person.Identification,
+                    Person.Age
                 };
 
                 int rowsAffected = await _context.ExecuteAsync(query, parameters);
-                return rowsAffected > 0;
+
+                return rowsAffected > 0; // true or false
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"No se pudo actualizar {Rol}");
+                _logger.LogError(ex, $"No se pudo actualizar {Person}");
                 throw;
 
             }
@@ -115,11 +138,11 @@ namespace Data
         {
             try
             {
-                const string query = @"DELETE FROM Rol
+                const string query = @"DELETE FROM Person
                                         WHERE ""Id"" = @Id";
                 var parameters = new { Id = id };
                 var delete = await _context.ExecuteAsync(query, parameters);
-                return new { rowAfefects = delete };
+                return new { rowAfefects = delete }; // { rowAfefects = 1}
             }
             catch (Exception ex)
             {
@@ -133,13 +156,13 @@ namespace Data
         {
             try
             {
-                const string query = @"UPDATE Rol 
-                                        SET ""Status"" = 0 
+                const string query = @"UPDATE public.""Person"" 
+                                        SET ""Status"" = 0
                                         WHERE ""Id"" = @Id";
                 var parameters = new { Id = id };
                 var deleteLogical = await _context.ExecuteAsync(query, parameters);
                 return new { rowAfectes = deleteLogical };
-  
+
             }
             catch (Exception ex)
             {
@@ -151,67 +174,69 @@ namespace Data
 
         //======================================______________  LINQ  ______________====================================== 
 
+        // ORM
+
         // SELECT ALL
-        public async Task<IEnumerable<Rol>> GetAllAsyncLinq()
+        public async Task<IEnumerable<Person>> GetAllAsyncLinq()
         {
             try
             {
-                return await _context.Set<Rol>()
+                return await _context.Set<Person>()
                 .Where(p => p.Status == 1)
                 .ToListAsync();
             }
             catch (Exception ex)
             {
-                _logger.LogInformation(ex, "No se pudo obetner a las Rolas");
+                _logger.LogInformation(ex, "No se pudo obetner a las Personas");
                 throw;
             }
         }
 
         // SELECT BY ID
-        public async Task<Rol?> GetByIdAsyncLinq(int id)
+        public async Task<Person?> GetByIdAsyncLinq(int id)
         {
             try
             {
-                return await _context.Set<Rol>().FindAsync(id);
+                return await _context.Set<Person>().FindAsync(id);
 
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"Error al traer una Rola por id {id}");
+                _logger.LogError(ex, $"Error al traer una Persona por id {id}");
                 throw;
             }
         }
 
         // INSERT 
-        public async Task<Rol> CreateAsyncLinq(Rol Rol)
+        public async Task<Person> CreateAsyncLinq(Person Person)
         {
             try
             {
-                Rol.Status = 0; // Establece el estado de la Rola (activo e inactivo)
-                await _context.Set<Rol>().AddAsync(Rol);
+                Person.Status = 1; // Establece el estado de la Persona (activo e inactivo)
+                await _context.Set<Person>().AddAsync(Person);
                 await _context.SaveChangesAsync();
-                return Rol;
+                return Person;
 
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"no se pudo agregar Rola {Rol}");
+                _logger.LogError(ex, $"no se pudo agregar Persona {Person}");
                 throw;
             }
         }
 
         // UPDATE
-        public async Task<bool> UpdateAsyncLinq(Rol Rol)
+        public async Task<bool> UpdateAsyncLinq(Person Person)
         {
             try
             {
-                _context.Set<Rol>().Update(Rol);
+                _context.Set<Person>().Update(Person);
                 await _context.SaveChangesAsync();
                 return true;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"No se pudo actualizar {Rol}");
+                _logger.LogError(ex, $"No se pudo actualizar {Person}");
                 throw;
 
             }
@@ -222,11 +247,11 @@ namespace Data
         {
             try
             {
-                var Delete = await _context.Set<Rol>().FindAsync(id);
+                var Delete = await _context.Set<Person>().FindAsync(id);
 
                 if (Delete == null) return false; // usuario inexistente
 
-                _context.Set<Rol>().Remove(Delete);
+                _context.Set<Person>().Remove(Delete);
                 await _context.SaveChangesAsync();
                 return true;
             }
@@ -242,7 +267,7 @@ namespace Data
         {
             try
             {
-                var entity = await _context.Set<Rol>().FindAsync(id);
+                var entity = await _context.Set<Person>().FindAsync(id);
                 if (entity == null) return false; // usuario inexistente
 
                 // Marcar como eliminado
@@ -256,6 +281,5 @@ namespace Data
                 return false;
             }
         }
-
     }
 }

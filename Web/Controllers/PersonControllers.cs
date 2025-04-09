@@ -1,4 +1,5 @@
 ﻿using Business;
+using Business.services;
 using Entity.DTOs;
 using Microsoft.AspNetCore.Mvc;
 using Utilities.Exeptions;
@@ -29,7 +30,7 @@ namespace Web.ContPersonlers
         {
             try
             {
-                var Persons = await _PersonBusiness.GetAllPersonesAsync();
+                var Persons = await _PersonBusiness.GetAllAsync();
                 return Ok(Persons);
             }
             catch (ExternalServiceException ex)
@@ -49,7 +50,7 @@ namespace Web.ContPersonlers
         {
             try
             {
-                var Person = await _PersonBusiness.GetPersonByIdAsync(id);
+                var Person = await _PersonBusiness.GetByIdAsync(id);
                 return Ok(Person);
             }
             catch (ValidationException ex)
@@ -78,7 +79,7 @@ namespace Web.ContPersonlers
         {
             try
             {
-                var createdPerson = await _PersonBusiness.CreatePersonAsync(PersonDto);
+                var createdPerson = await _PersonBusiness.CreateAsync(PersonDto);
                 return CreatedAtAction(nameof(GetPersonById), new { id = createdPerson.Id }, createdPerson);
             }
             catch (ValidationException ex)
@@ -104,7 +105,7 @@ namespace Web.ContPersonlers
         {
             try
             {
-                var update = await _PersonBusiness.UpdatePersonAsync(PersonDto);
+                var update = await _PersonBusiness.UpdateAsync(PersonDto);
                 return Ok(update);
             }
             catch (ValidationException ex)
@@ -125,37 +126,37 @@ namespace Web.ContPersonlers
         }
 
         // DELETE => LOGICAL
-        [HttpPut("logical/{id}")]
-        [ProducesResponseType(typeof(Object), 200)]
-        [ProducesResponseType(204)]
-        [ProducesResponseType(400)]
-        [ProducesResponseType(404)]
-        [ProducesResponseType(500)]
-        public async Task<IActionResult> DeletlePerson(int id)
-        {
-            try
-            {
-                var response = await _PersonBusiness.DeletelogicaPersonlAsync(id);
-                return Ok(response);
-            }
-            catch (ValidationException ex)
-            {
-                _logger.LogWarning(ex, "Validación fallida al eliminar el Person con ID: {PersonId}", id);
-                return BadRequest(new { message = ex.Message });
-            }
-            catch (EntityNotFoundException ex)
-            {
-                _logger.LogInformation(ex, "Person no encontrado con ID: {PersonId}", id);
-                return NotFound(new { message = ex.Message });
-            }
-            catch (ExternalServiceException ex)
-            {
-                _logger.LogError(ex, "Error al eliminar el Person con ID: {PersonId}", id);
-                return StatusCode(500, new { message = ex.Message });
-            }
-        }
+        //[HttpPut("logical/{id}")]
+        //[ProducesResponseType(typeof(Object), 200)]
+        //[ProducesResponseType(204)]
+        //[ProducesResponseType(400)]
+        //[ProducesResponseType(404)]
+        //[ProducesResponseType(500)]
+        //public async Task<IActionResult> DeletlePerson(int id)
+        //{
+        //    try
+        //    {
+        //        var response = await _PersonBusiness.DeleteAsync(id);
+        //        return Ok(response);
+        //    }
+        //    catch (ValidationException ex)
+        //    {
+        //        _logger.LogWarning(ex, "Validación fallida al eliminar el Person con ID: {PersonId}", id);
+        //        return BadRequest(new { message = ex.Message });
+        //    }
+        //    catch (EntityNotFoundException ex)
+        //    {
+        //        _logger.LogInformation(ex, "Person no encontrado con ID: {PersonId}", id);
+        //        return NotFound(new { message = ex.Message });
+        //    }
+        //    catch (ExternalServiceException ex)
+        //    {
+        //        _logger.LogError(ex, "Error al eliminar el Person con ID: {PersonId}", id);
+        //        return StatusCode(500, new { message = ex.Message });
+        //    }
+        //}
 
-        // DELETE => PERSISTENT
+        //// DELETE => PERSISTENT
         [HttpDelete("{id}")]
         [ProducesResponseType(typeof(Object), 200)]
         [ProducesResponseType(204)]
@@ -166,7 +167,7 @@ namespace Web.ContPersonlers
         {
             try
             {
-                var response = await _PersonBusiness.DeletePersistenPersonAsync(id);
+                var response = await _PersonBusiness.DeleteAsync(id);
                 return Ok(response); // Código 204: Eliminación exitosa sin contenido
             }
             catch (ValidationException ex)

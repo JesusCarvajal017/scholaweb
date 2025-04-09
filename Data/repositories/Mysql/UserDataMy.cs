@@ -3,19 +3,19 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Data.interfaces;
 using Entity;
-using Entity.DTOs;
 using Entity.Model;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
-namespace Data
+namespace Data.repositories.Mysql
 {
-    public class ModuleFormData
+    public class UserDataMy : IGlobalCrud<User>
     {
         private readonly ApplicationDbContext _context;
-        private readonly ILogger<ModuleFormData> _logger;
-        public ModuleFormData(ApplicationDbContext context, ILogger<ModuleFormData> logger)
+        private readonly ILogger<UserDataMy> _logger;
+        public UserDataMy(ApplicationDbContext context, ILogger<UserDataMy> logger)
         {
             _context = context;
             this._logger = logger;
@@ -24,95 +24,89 @@ namespace Data
         //======================================______________  SQL  ______________====================================== 
 
         // SELECT ALL
-        public async Task<IEnumerable<ModuleFormDto>> GetAllAsync()
+        public async Task<IEnumerable<User>> GetAllAsync()
         {
             try
             {
-                const string query = @"SELECT mf.""Id"", ""ModuleId"", ml.""Name"" AS ""ModuleName"", ""FormId"" , fr.""Name"" AS ""FormName""
-	                                    FROM public.""ModuleForm"" AS mf
-                                    INNER JOIN public.""Module"" AS ml
-	                                    ON mf.""ModuleId"" = ml.""Id""
-                                    INNER JOIN public.form AS fr
-	                                    ON mf.""FormId"" = fr.""Id"";";
-
-                return await _context.QueryAsync<ModuleFormDto>(query);
+                const string query = @"SELECT * FROM ""user"" WHERE ""Status"" = 1
+                                        ORDER BY ""Id"" ASC;";
+                return await _context.QueryAsync<User>(query);
             }
             catch (Exception ex)
             {
-                _logger.LogInformation(ex, "No se pudo obetner a las ModuleForm");
+                _logger.LogInformation(ex, "No se pudo obetner a las Useras");
                 throw;
             }
 
         }
 
         // SELECT BY ID
-        public async Task<ModuleFormDto?> GetByIdAsync(int id)
+        public async Task<User?> GetByIdAsync(int id)
         {
             try
             {
-                const string query = @"SELECT mf.""Id"", ""ModuleId"", ml.""Name"" AS ""ModuleName"", ""FormId"" , fr.""Name"" AS ""FormName""
-	                                    FROM public.""ModuleForm"" AS mf
-                                    INNER JOIN public.""Module"" AS ml
-	                                    ON mf.""ModuleId"" = ml.""Id""
-                                    INNER JOIN public.form AS fr
-	                                    ON mf.""FormId"" = fr.""Id""
-                                     WHERE mf.""Id"" = @Id;";
-
+                const string query = @"SELECT * FROM public.""user"" WHERE ""Id"" = @Id;";
                 var parameters = new { Id = id };
-                return await _context.QueryFirstOrDefaultAsync<ModuleFormDto>(query, parameters);
+                return await _context.QueryFirstOrDefaultAsync<User>(query, parameters);
 
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"Error al traer una ModuleForma por id {id}");
+                _logger.LogError(ex, $"Error al traer una Usera por id {id}");
                 throw;
             }
         }
 
         // INSERT 
-        public async Task<ModuleForm> CreateAsync(ModuleForm ModuleForm)
+        public async Task<User> CreateAsync(User User)
         {
             try
             {
                 const string query = @"
-                          INSERT INTO public.""ModuleForm""(
-	                            ""ModuleId"", ""FormId"")
-	                            VALUES (@ModuleId, @FormId)
+                           INSERT INTO public.""user""(
+	                            ""UserName"", ""Password"", ""Status"", ""PersonId"")
+	                       VALUES (@UserName, @Password, @Status, @PersonId)
                             RETURNING ""Id"";";
 
                 var parameters = new
                 {
-                    ModuleForm.FormId,
-                    ModuleForm.ModuleId
+                    User.UserName,
+                    User.Password,
+                    User.PersonId,
+                    Status = 1
                 };
 
-                ModuleForm.Id = await _context.ExecuteScalarAsync<int>(query, parameters);
+                User.Id = await _context.ExecuteScalarAsync<int>(query, parameters);
+                User.Status = 1;
 
-                return ModuleForm;
+                return User;
 
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"no se pudo agregar ModuleForm {ModuleForm}");
+                _logger.LogError(ex, $"no se pudo agregar User {User}");
                 throw;
             }
         }
 
         // UPDATE
-        public async Task<bool> UpdateAsync(ModuleForm ModuleForm)
+        public async Task<bool> UpdateAsync(User User)
         {
             try
             {
                 const string query = @"
-                                  UPDATE public.""ModuleForm""
-	                                SET ""ModuleId""=@ModuleId, ""FormId""=@FormId
-	                               WHERE ""Id""=Id;";
+                                    UPDATE public.""user""
+	                                    SET ""UserName""=@UserName, 
+                                            ""Password""=@Password, 
+                                            ""PersonId""=@PersonId
+	                                WHERE ""Id"" = @Id;";
 
                 var parameters = new
                 {
-                    ModuleForm.Id,
-                    ModuleForm.ModuleId,
-                    ModuleForm.FormId
+                    User.Id,
+                    User.UserName,
+                    User.Password,
+                    User.PersonId
                 };
 
                 int rowsAffected = await _context.ExecuteAsync(query, parameters);
@@ -120,7 +114,7 @@ namespace Data
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"No se pudo actualizar {ModuleForm}");
+                _logger.LogError(ex, $"No se pudo actualizar {User}");
                 throw;
 
             }
@@ -131,7 +125,7 @@ namespace Data
         {
             try
             {
-                const string query = @"DELETE FROM ""ModuleForm""
+                const string query = @"DELETE FROM ""user""
                                         WHERE ""Id"" = @Id";
                 var parameters = new { Id = id };
                 var delete = await _context.ExecuteAsync(query, parameters);
@@ -149,7 +143,7 @@ namespace Data
         {
             try
             {
-                const string query = @"UPDATE ""ModuleForm"" 
+                const string query = @"UPDATE ""user"" 
                                         SET ""Status"" = 0 
                                         WHERE ""Id"" = @Id";
                 var parameters = new { Id = id };
@@ -164,66 +158,70 @@ namespace Data
             }
         }
 
+
         //======================================______________  LINQ  ______________====================================== 
 
         // SELECT ALL
-        public async Task<IEnumerable<ModuleForm>> GetAllAsyncLinq()
+        public async Task<IEnumerable<User>> GetAllAsyncLinq()
         {
             try
             {
-                return await _context.Set<ModuleForm>().ToListAsync();
+                return await _context.Set<User>()
+                .Where(p => p.Status == 1)
+                .ToListAsync();
             }
             catch (Exception ex)
             {
-                _logger.LogInformation(ex, "No se pudo obetner a las ModuleFormas");
+                _logger.LogInformation(ex, "No se pudo obetner a las Useras");
                 throw;
             }
         }
 
         // SELECT BY ID
-        public async Task<ModuleForm?> GetByIdAsyncLinq(int id)
+        public async Task<User?> GetByIdAsyncLinq(int id)
         {
             try
             {
-                return await _context.Set<ModuleForm>().FindAsync(id);
+                return await _context.Set<User>().FindAsync(id);
 
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"Error al traer una ModuleForma por id {id}");
+                _logger.LogError(ex, $"Error al traer una Usera por id {id}");
                 throw;
             }
         }
 
         // INSERT 
-        public async Task<ModuleForm> CreateAsyncLinq(ModuleForm ModuleForm)
+        public async Task<User> CreateAsyncLinq(User User)
         {
             try
             {
-                await _context.Set<ModuleForm>().AddAsync(ModuleForm);
+                User.Status = 0; // Establece el estado de la Usera (activo e inactivo)
+                await _context.Set<User>().AddAsync(User);
                 await _context.SaveChangesAsync();
-                return ModuleForm;
+                return User;
 
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"no se pudo agregar ModuleForma {ModuleForm}");
+                _logger.LogError(ex, $"no se pudo agregar Usera {User}");
                 throw;
             }
         }
 
         // UPDATE
-        public async Task<bool> UpdateAsyncLinq(ModuleForm ModuleForm)
+        public async Task<bool> UpdateAsyncLinq(User User)
         {
             try
             {
-                _context.Set<ModuleForm>().Update(ModuleForm);
+                _context.Set<User>().Update(User);
                 await _context.SaveChangesAsync();
                 return true;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"No se pudo actualizar {ModuleForm}");
+                _logger.LogError(ex, $"No se pudo actualizar {User}");
                 throw;
 
             }
@@ -234,11 +232,11 @@ namespace Data
         {
             try
             {
-                var Delete = await _context.Set<ModuleForm>().FindAsync(id);
+                var Delete = await _context.Set<User>().FindAsync(id);
 
-                if (Delete == null) return false; 
+                if (Delete == null) return false; // usuario inexistente
 
-                _context.Set<ModuleForm>().Remove(Delete);
+                _context.Set<User>().Remove(Delete);
                 await _context.SaveChangesAsync();
                 return true;
             }
@@ -248,5 +246,26 @@ namespace Data
                 return false;
             }
         }
+
+        // DELETE LOGICAL
+        public async Task<bool> DeleteLogicalAsyncLinq(int id)
+        {
+            try
+            {
+                var entity = await _context.Set<User>().FindAsync(id);
+                if (entity == null) return false; // usuario inexistente
+
+                // Marcar como eliminado
+                entity.Status = 0;
+                await _context.SaveChangesAsync();
+                return true;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogInformation($"Error al realizar delete lógico con LINQ: {ex.Message}");
+                return false;
+            }
+        }
+
     }
 }

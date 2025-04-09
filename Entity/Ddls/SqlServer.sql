@@ -18,7 +18,7 @@ CREATE TABLE [User] (
     [Id] int IDENTITY(1,1) NOT NULL,
     [UserName] nvarchar(150) NOT NULL, 
     [Password] nvarchar(max) NOT NULL,
-    [Status] nvarchar(150) NOT NULL,
+    [Status] Int NOT NULL,
     [PersonId] int  NOT NULL,
 
     CONSTRAINT [PK_User] PRIMARY KEY ([Id]),   
