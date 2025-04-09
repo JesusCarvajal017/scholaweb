@@ -17,6 +17,16 @@ namespace Data.factories
 
         CrudBase<Module> CreateModuleData();
 
+        CrudBase<ModuleForm> CreateModuleFormData();
+
+        CrudBase<User> CreateUserData();
+        CrudBase<UserRol> CreateUserRolData();
+        CrudBase<RolFormPermission> CreateRolFormPermissionData();
+        CrudBase<Permission> CreatePermissionData();
+
+
+
+
         //CrudBase<User> CreateUserData();
         //IGlobalLinq<RolFormPermission> CreateRolFormPermissionData();
     }

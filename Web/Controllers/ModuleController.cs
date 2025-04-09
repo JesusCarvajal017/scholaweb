@@ -29,7 +29,7 @@ namespace Web.Controllers
         {
             try
             {
-                var Modules = await _ModuleBusiness.GetAllModuleesAsync();
+                var Modules = await _ModuleBusiness.GetAllAsync();
                 return Ok(Modules);
             }
             catch (ExternalServiceException ex)
@@ -49,7 +49,7 @@ namespace Web.Controllers
         {
             try
             {
-                var Module = await _ModuleBusiness.GetModuleByIdAsync(id);
+                var Module = await _ModuleBusiness.GetByIdAsync(id);
                 return Ok(Module);
             }
             catch (ValidationException ex)
@@ -78,7 +78,7 @@ namespace Web.Controllers
         {
             try
             {
-                var createdModule = await _ModuleBusiness.CreateModuleAsync(ModuleDto);
+                var createdModule = await _ModuleBusiness.CreateAsync(ModuleDto);
                 return CreatedAtAction(nameof(GetModuleById), new { id = createdModule.Id }, createdModule);
             }
             catch (ValidationException ex)
@@ -104,7 +104,7 @@ namespace Web.Controllers
         {
             try
             {
-                var update = await _ModuleBusiness.UpdateModuleAsync(ModuleDto);
+                var update = await _ModuleBusiness.UpdateAsync(ModuleDto);
                 return Ok(update);
             }
             catch (ValidationException ex)
@@ -125,35 +125,35 @@ namespace Web.Controllers
         }
 
         // DELETE => LOGICAL
-        [HttpPut("logical/{id}")]
-        [ProducesResponseType(typeof(Object), 200)]
-        [ProducesResponseType(204)]
-        [ProducesResponseType(400)]
-        [ProducesResponseType(404)]
-        [ProducesResponseType(500)]
-        public async Task<IActionResult> DeletleModule(int id)
-        {
-            try
-            {
-                var response = await _ModuleBusiness.DeletelogicaModulelAsync(id);
-                return Ok(response);
-            }
-            catch (ValidationException ex)
-            {
-                _logger.LogWarning(ex, "Validación fallida al eliminar el Module con ID: {ModuleId}", id);
-                return BadRequest(new { message = ex.Message });
-            }
-            catch (EntityNotFoundException ex)
-            {
-                _logger.LogInformation(ex, "Module no encontrado con ID: {ModuleId}", id);
-                return NotFound(new { message = ex.Message });
-            }
-            catch (ExternalServiceException ex)
-            {
-                _logger.LogError(ex, "Error al eliminar el Module con ID: {ModuleId}", id);
-                return StatusCode(500, new { message = ex.Message });
-            }
-        }
+        //[HttpPut("logical/{id}")]
+        //[ProducesResponseType(typeof(Object), 200)]
+        //[ProducesResponseType(204)]
+        //[ProducesResponseType(400)]
+        //[ProducesResponseType(404)]
+        //[ProducesResponseType(500)]
+        //public async Task<IActionResult> DeletleModule(int id)
+        //{
+        //    try
+        //    {
+        //        var response = await _ModuleBusiness.DeletelogicaModulelAsync(id);
+        //        return Ok(response);
+        //    }
+        //    catch (ValidationException ex)
+        //    {
+        //        _logger.LogWarning(ex, "Validación fallida al eliminar el Module con ID: {ModuleId}", id);
+        //        return BadRequest(new { message = ex.Message });
+        //    }
+        //    catch (EntityNotFoundException ex)
+        //    {
+        //        _logger.LogInformation(ex, "Module no encontrado con ID: {ModuleId}", id);
+        //        return NotFound(new { message = ex.Message });
+        //    }
+        //    catch (ExternalServiceException ex)
+        //    {
+        //        _logger.LogError(ex, "Error al eliminar el Module con ID: {ModuleId}", id);
+        //        return StatusCode(500, new { message = ex.Message });
+        //    }
+        //}
 
         // DELETE => PERSISTENT
         [HttpDelete("{id}")]
@@ -166,7 +166,7 @@ namespace Web.Controllers
         {
             try
             {
-                var response = await _ModuleBusiness.DeletePersistenModuleAsync(id);
+                var response = await _ModuleBusiness.DeleteAsync(id);
                 return Ok(response); // Código 204: Eliminación exitosa sin contenido
             }
             catch (ValidationException ex)

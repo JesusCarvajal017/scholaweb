@@ -4,7 +4,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.Configuration;
 using System.Data;
-using System.Reflection;
 
 namespace Entity
 {
@@ -13,6 +12,7 @@ namespace Entity
         public DbSet<Person> Person { get; set; }
         public DbSet<Rol> rol { get; set; }
         public DbSet<Form> form { get; set; }
+        public DbSet<Module> module { get; set; }
         public DbSet<Permission> permission { get; set; }
         public DbSet<User> user { get; set; }
         public DbSet<UserRol> userRol { get; set; }

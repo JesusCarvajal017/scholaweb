@@ -36,7 +36,7 @@ namespace Data.repositories.Global
         }
 
         // SELECT BY ID
-        public async Task<T?> GetByIdAsyncLinq(int id)
+        public virtual async Task<T?> GetByIdAsyncLinq(int id)
         {
             try
             {
@@ -51,7 +51,7 @@ namespace Data.repositories.Global
         }
 
         // INSERT 
-        public async Task<T> CreateAsyncLinq(T entity)
+        public virtual async Task<T> CreateAsyncLinq(T entity)
         {
             try
             {
@@ -68,7 +68,7 @@ namespace Data.repositories.Global
         }
 
         // UPDATE
-        public async Task<bool> UpdateAsyncLinq(T entity)
+        public virtual async Task<bool> UpdateAsyncLinq(T entity)
         {
             try
             {
@@ -86,7 +86,7 @@ namespace Data.repositories.Global
         }
 
         // DELETE PERSISTENT
-        public async Task<Object> DeletePersistentAsyncLinq(int id)
+        public virtual async Task<Object> DeletePersistentAsyncLinq(int id)
         {
             try
             {
@@ -106,7 +106,7 @@ namespace Data.repositories.Global
         }
 
         // DELETE LOGICAL
-        public async Task<Object> DeleteLogicalAsyncLinq(int id)
+        public virtual async Task<Object> DeleteLogicalAsyncLinq(int id)
         {
             try
             {

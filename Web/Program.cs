@@ -18,11 +18,19 @@ builder.Services.AddAuthorization();
 
 builder.Services.AddScoped<IDataFactoryGlobal, GlobalFactory>();
 
-builder.Services.AddDataAccessFactory("PgAdmin", builder.Configuration);
+builder.Services.AddDataAccessFactory("MySQL", builder.Configuration);
 builder.Services.AddScoped<PersonBusiness>();
 //builder.Services.AddScoped<UserBusiness>();
 builder.Services.AddScoped<RolBusiness>();
 builder.Services.AddScoped<FormBusiness>();
+builder.Services.AddScoped<ModuleBusiness>();
+builder.Services.AddScoped<ModuleFormBusiness>();
+builder.Services.AddScoped<UserBusiness>();
+builder.Services.AddScoped<UserRolBusiness>();
+builder.Services.AddScoped<RolFormPermissionBusiness>();
+builder.Services.AddScoped<PermissionBusiness>();
+
+
 
 builder.Services.AddOpenApi();
 builder.Services.AddEndpointsApiExplorer();

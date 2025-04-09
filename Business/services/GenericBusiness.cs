@@ -79,7 +79,7 @@ namespace Business.services
         }
 
        // UPDATE
-        public virtual async Task<Dto> UpdateAsync(Dto dto)
+        public virtual async Task<Object> UpdateAsync(Dto dto)
         {
             if (dto == null)
                 throw new ValidationException("Entidad", $"{typeof(T).Name} no puede ser nulo");
@@ -98,7 +98,7 @@ namespace Business.services
                 if (!updated)
                     throw new ExternalServiceException("Base de datos", $"No se pudo actualizar {typeof(T).Name}");
 
-                return dto;
+                return new { rowAfects = updated };
             }
             catch (Exception ex)
             {

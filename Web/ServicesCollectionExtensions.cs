@@ -1,5 +1,4 @@
 ﻿using Data.factories;
-using Data.repositories.Mysql;
 using Entity;
 using Entity.Model;
 using Microsoft.EntityFrameworkCore;

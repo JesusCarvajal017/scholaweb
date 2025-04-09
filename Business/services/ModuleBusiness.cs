@@ -11,17 +11,17 @@ namespace Business.services
     public class ModuleBusiness : GenericBusiness<Module, ModuleDto>
     {
         public ModuleBusiness
-            (IDataFactoryGlobal factory, ILogger<Form> logger, IMapper mapper) : base(factory.CreateFormData(), logger, mapper)
+            (IDataFactoryGlobal factory, ILogger<Module> logger, IMapper mapper) : base(factory.CreateModuleData(), logger, mapper)
         {
 
         }
 
-        protected override void Validate(FormDto form)
+        protected override void Validate(ModuleDto moduleDto)
         {
-            if (form == null)
+            if (moduleDto == null)
                 throw new ValidationException("El formulario no puede ser nulo.");
 
-            if (string.IsNullOrWhiteSpace(form.Name))
+            if (string.IsNullOrWhiteSpace(moduleDto.Name))
                 throw new ValidationException("El título del formulario es obligatorio.");
 
             // Agrega más validaciones si necesitas

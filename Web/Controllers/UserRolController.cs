@@ -1,4 +1,5 @@
 ﻿using Business;
+using Business.services;
 using Entity.DTOs;
 using Microsoft.AspNetCore.Mvc;
 using Utilities.Exeptions;
@@ -10,11 +11,11 @@ namespace Web.Controllers
     [Produces("application/json")]
     public class UserRolController : ControllerBase
     {
-        private readonly UserRolBusinness _UserRolBusiness;
+        private readonly UserRolBusiness _UserRolBusiness;
         private readonly ILogger<UserRolController> _logger;
 
         /// Constructor del controlador de permisos
-        public UserRolController(UserRolBusinness UserRolBusiness, ILogger<UserRolController> logger)
+        public UserRolController(UserRolBusiness UserRolBusiness, ILogger<UserRolController> logger)
         {
             _UserRolBusiness = UserRolBusiness;
             _logger = logger;
@@ -28,7 +29,7 @@ namespace Web.Controllers
         {
             try
             {
-                var UserRols = await _UserRolBusiness.GetAllUserRolsAsync();
+                var UserRols = await _UserRolBusiness.GetAllAsync();
                 return Ok(UserRols);
             }
             catch (ExternalServiceException ex)
@@ -48,7 +49,7 @@ namespace Web.Controllers
         {
             try
             {
-                var UserRol = await _UserRolBusiness.GetUserRolByIdAsync(id);
+                var UserRol = await _UserRolBusiness.GetByIdAsync(id);
                 return Ok(UserRol);
             }
             catch (ValidationException ex)
@@ -73,11 +74,11 @@ namespace Web.Controllers
         [ProducesResponseType(typeof(UserRolDto), 201)]
         [ProducesResponseType(400)]
         [ProducesResponseType(500)]
-        public async Task<IActionResult> CreateUserRol([FromBody] UserRolDto UserRolDto)
+        public async Task<IActionResult> CreateUserRol([FromBody] UserRolCreateDto UserRolDto)
         {
             try
             {
-                var createdUserRol = await _UserRolBusiness.CreateUserRolAsync(UserRolDto);
+                var createdUserRol = await _UserRolBusiness.CreateAsyncNew(UserRolDto);
                 return CreatedAtAction(nameof(GetUserRolById), new { id = createdUserRol.Id }, createdUserRol);
             }
             catch (ValidationException ex)
@@ -99,11 +100,11 @@ namespace Web.Controllers
         [ProducesResponseType(400)]
         [ProducesResponseType(404)]
         [ProducesResponseType(500)]
-        public async Task<IActionResult> UpdateUserRol([FromBody] UserRolDto UserRolDto)
+        public async Task<IActionResult> UpdateUserRol([FromBody] UserRolCreateDto UserRolDto)
         {
             try
             {
-                var update = await _UserRolBusiness.UpdateUserRolAsync(UserRolDto);
+                var update = await _UserRolBusiness.UpdateNew(UserRolDto);
                 return Ok(update);
             }
             catch (ValidationException ex)
@@ -166,7 +167,7 @@ namespace Web.Controllers
         {
             try
             {
-                var response = await _UserRolBusiness.DeletePersistenUserRolAsync(id);
+                var response = await _UserRolBusiness.DeleteAsync(id);
                 return Ok(response); // Código 204: Eliminación exitosa sin contenido
             }
             catch (ValidationException ex)

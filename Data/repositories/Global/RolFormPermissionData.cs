@@ -1,9 +1,9 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Data.interfaces;
 using Entity;
 using Entity.DTOs;
 using Entity.Model;
@@ -12,101 +12,51 @@ using Microsoft.Extensions.Logging;
 
 namespace Data.repositories.Global
 {
-    public class RolFormPermissionData
+    public class RolFormPermissionData : GenericData<RolFormPermission>
     {
-        private readonly ApplicationDbContext _context;
-        private readonly ILogger<RolFormPermissionData> _logger;
-        public RolFormPermissionData(ApplicationDbContext context, ILogger<RolFormPermissionData> logger)
+        private ApplicationDbContext context;
+        private ILogger<RolFormPermissionData> _logger;
+        public RolFormPermissionData(ApplicationDbContext context, ILogger<RolFormPermission> logger) : base(context, logger)
         {
-            _context = context;
-            _logger = logger;
+            this.context = context;
         }
 
-        //======================================______________  LINQ  ______________====================================== 
-
-        // SELECT ALL
-        public async Task<IEnumerable<RolFormPermission>> GetAllAsyncLinq()
+        public override async Task<IEnumerable<RolFormPermission>> GetAllAsyncLinq()
         {
             try
             {
-                return await _context.Set<RolFormPermission>().ToListAsync();
+                return await context.RolFormPermission
+                    .Include(rfp => rfp.Rol)
+                    .Include(rfp => rfp.Form)
+                    .Include(rfp => rfp.Permission)
+                    .ToListAsync();
             }
             catch (Exception ex)
             {
-                _logger.LogInformation(ex, "No se pudo obetner a las RolFormPermissionas");
+                _logger.LogError(ex, "Error retrieving RolFormPermissions");
                 throw;
             }
         }
 
-        // SELECT BY ID
-        public async Task<RolFormPermission?> GetByIdAsyncLinq(int id)
+        public override async Task<RolFormPermission> GetByIdAsyncLinq(int id)
         {
             try
             {
-                return await _context.Set<RolFormPermission>().FindAsync(id);
-
+                return await context.RolFormPermission
+                    .Include(rfp => rfp.Rol)
+                    .Include(rfp => rfp.Form)
+                    .Include(rfp => rfp.Permission)
+                    .FirstOrDefaultAsync(rfp => rfp.Id == id);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"Error al traer una RolFormPermissiona por id {id}");
+                _logger.LogError(ex, "Error retrieving RolFormPermissions");
                 throw;
             }
         }
 
-        // INSERT 
-        public async Task<RolFormPermission> CreateAsyncLinq(RolFormPermission RolFormPermission)
-        {
-            try
-            {
-                await _context.Set<RolFormPermission>().AddAsync(RolFormPermission);
-                await _context.SaveChangesAsync();
-                return RolFormPermission;
-
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, $"no se pudo agregar RolFormPermissiona {RolFormPermission}");
-                throw;
-            }
-        }
-
-        // UPDATE
-        public async Task<bool> UpdateAsyncLinq(RolFormPermission RolFormPermission)
-        {
-            try
-            {
-                _context.Set<RolFormPermission>().Update(RolFormPermission);
-                await _context.SaveChangesAsync();
-                return true;
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, $"No se pudo actualizar {RolFormPermission}");
-                throw;
-
-            }
-        }
-
-        // DELETE PERSISTENT
-        public async Task<bool> DeletePersistentAsyncLinq(int id)
-        {
-            try
-            {
-                var Delete = await _context.Set<RolFormPermission>().FindAsync(id);
-
-                if (Delete == null) return false; // usuario inexistente
-
-                _context.Set<RolFormPermission>().Remove(Delete);
-                await _context.SaveChangesAsync();
-                return true;
-            }
-            catch (Exception ex)
-            {
-                _logger.LogInformation($" error al eliminar {ex.Message}");
-                return false;
-            }
-        }
 
 
     }
 }
+

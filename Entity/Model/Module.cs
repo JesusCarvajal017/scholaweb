@@ -7,6 +7,6 @@
         public string Description { get; set; }
         public int Status { get; set; }
 
-        public ICollection<ModuleForm> ModuleForm { get; set; }
+        //public ICollection<ModuleForm> ModuleForm { get; set; }
     }
 }

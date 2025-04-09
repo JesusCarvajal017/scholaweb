@@ -1,4 +1,5 @@
 ﻿using Business;
+using Business.services;
 using Entity.DTOs;
 using Microsoft.AspNetCore.Mvc;
 using Utilities.Exeptions;
@@ -29,7 +30,7 @@ namespace Web.Controllers
         {
             try
             {
-                var Permissions = await _PermissionBusiness.GetAllPermissionesAsync();
+                var Permissions = await _PermissionBusiness.GetAllAsync();
                 return Ok(Permissions);
             }
             catch (ExternalServiceException ex)
@@ -49,7 +50,7 @@ namespace Web.Controllers
         {
             try
             {
-                var Permission = await _PermissionBusiness.GetPermissionByIdAsync(id);
+                var Permission = await _PermissionBusiness.GetByIdAsync(id);
                 return Ok(Permission);
             }
             catch (ValidationException ex)
@@ -78,7 +79,7 @@ namespace Web.Controllers
         {
             try
             {
-                var createdPermission = await _PermissionBusiness.CreatePermissionAsync(PermissionDto);
+                var createdPermission = await _PermissionBusiness.CreateAsync(PermissionDto);
                 return CreatedAtAction(nameof(GetPermissionById), new { id = createdPermission.Id }, createdPermission);
             }
             catch (ValidationException ex)
@@ -104,7 +105,7 @@ namespace Web.Controllers
         {
             try
             {
-                var update = await _PermissionBusiness.UpdatePermissionAsync(PermissionDto);
+                var update = await _PermissionBusiness.UpdateAsync(PermissionDto);
                 return Ok(update);
             }
             catch (ValidationException ex)
@@ -125,35 +126,35 @@ namespace Web.Controllers
         }
 
         // DELETE => LOGICAL
-        [HttpPut("logical/{id}")]
-        [ProducesResponseType(typeof(Object), 200)]
-        [ProducesResponseType(204)]
-        [ProducesResponseType(400)]
-        [ProducesResponseType(404)]
-        [ProducesResponseType(500)]
-        public async Task<IActionResult> DeletlePermission(int id)
-        {
-            try
-            {
-                var response = await _PermissionBusiness.DeletelogicaPermissionlAsync(id);
-                return Ok(response);
-            }
-            catch (ValidationException ex)
-            {
-                _logger.LogWarning(ex, "Validación fallida al eliminar el Permission con ID: {PermissionId}", id);
-                return BadRequest(new { message = ex.Message });
-            }
-            catch (EntityNotFoundException ex)
-            {
-                _logger.LogInformation(ex, "Permission no encontrado con ID: {PermissionId}", id);
-                return NotFound(new { message = ex.Message });
-            }
-            catch (ExternalServiceException ex)
-            {
-                _logger.LogError(ex, "Error al eliminar el Permission con ID: {PermissionId}", id);
-                return StatusCode(500, new { message = ex.Message });
-            }
-        }
+        //[HttpPut("logical/{id}")]
+        //[ProducesResponseType(typeof(Object), 200)]
+        //[ProducesResponseType(204)]
+        //[ProducesResponseType(400)]
+        //[ProducesResponseType(404)]
+        //[ProducesResponseType(500)]
+        //public async Task<IActionResult> DeletlePermission(int id)
+        //{
+        //    try
+        //    {
+        //        var response = await _PermissionBusiness.DeleteAsync(id);
+        //        return Ok(response);
+        //    }
+        //    catch (ValidationException ex)
+        //    {
+        //        _logger.LogWarning(ex, "Validación fallida al eliminar el Permission con ID: {PermissionId}", id);
+        //        return BadRequest(new { message = ex.Message });
+        //    }
+        //    catch (EntityNotFoundException ex)
+        //    {
+        //        _logger.LogInformation(ex, "Permission no encontrado con ID: {PermissionId}", id);
+        //        return NotFound(new { message = ex.Message });
+        //    }
+        //    catch (ExternalServiceException ex)
+        //    {
+        //        _logger.LogError(ex, "Error al eliminar el Permission con ID: {PermissionId}", id);
+        //        return StatusCode(500, new { message = ex.Message });
+        //    }
+        //}
 
         // DELETE => PERSISTENT
         [HttpDelete("{id}")]
@@ -166,7 +167,7 @@ namespace Web.Controllers
         {
             try
             {
-                var response = await _PermissionBusiness.DeletePersistenPermissionAsync(id);
+                var response = await _PermissionBusiness.DeleteAsync(id);
                 return Ok(response); // Código 204: Eliminación exitosa sin contenido
             }
             catch (ValidationException ex)

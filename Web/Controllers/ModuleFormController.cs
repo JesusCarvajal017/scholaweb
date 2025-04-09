@@ -1,4 +1,4 @@
-﻿using Business;
+﻿using Business.services;
 using Entity.DTOs;
 using Microsoft.AspNetCore.Mvc;
 using Utilities.Exeptions;
@@ -28,7 +28,7 @@ namespace Web.Controllers
         {
             try
             {
-                var ModuleForms = await _ModuleFormBusiness.GetAllModuleFormsAsync();
+                var ModuleForms = await _ModuleFormBusiness.GetAllAsync();
                 return Ok(ModuleForms);
             }
             catch (ExternalServiceException ex)
@@ -48,7 +48,7 @@ namespace Web.Controllers
         {
             try
             {
-                var ModuleForm = await _ModuleFormBusiness.GetModuleFormByIdAsync(id);
+                var ModuleForm = await _ModuleFormBusiness.GetByIdAsync(id);
                 return Ok(ModuleForm);
             }
             catch (ValidationException ex)
@@ -70,14 +70,14 @@ namespace Web.Controllers
 
         // INSERT 
         [HttpPost]
-        [ProducesResponseType(typeof(ModuleFormDto), 201)]
+        [ProducesResponseType(typeof(ModuleFormCreateDto), 201)]
         [ProducesResponseType(400)]
         [ProducesResponseType(500)]
-        public async Task<IActionResult> CreateModuleForm([FromBody] ModuleFormDto ModuleFormDto)
+        public async Task<IActionResult> CreateModuleForm([FromBody] ModuleFormCreateDto ModuleFormDto)
         {
             try
             {
-                var createdModuleForm = await _ModuleFormBusiness.CreateModuleFormAsync(ModuleFormDto);
+                var createdModuleForm = await _ModuleFormBusiness.CreateAsyncNew(ModuleFormDto);
                 return CreatedAtAction(nameof(GetModuleFormById), new { id = createdModuleForm.Id }, createdModuleForm);
             }
             catch (ValidationException ex)
@@ -99,11 +99,11 @@ namespace Web.Controllers
         [ProducesResponseType(400)]
         [ProducesResponseType(404)]
         [ProducesResponseType(500)]
-        public async Task<IActionResult> UpdateModuleForm([FromBody] ModuleFormDto ModuleFormDto)
+        public async Task<IActionResult> UpdateModuleForm([FromBody] ModuleFormCreateDto ModuleFormDto)
         {
             try
             {
-                var update = await _ModuleFormBusiness.UpdateModuleFormAsync(ModuleFormDto);
+                var update = await _ModuleFormBusiness.UpdateNew(ModuleFormDto);
                 return Ok(update);
             }
             catch (ValidationException ex)
@@ -124,35 +124,35 @@ namespace Web.Controllers
         }
 
         // DELETE => LOGICAL
-        [HttpPut("logical/{id}")]
-        [ProducesResponseType(typeof(Object), 200)]
-        [ProducesResponseType(204)]
-        [ProducesResponseType(400)]
-        [ProducesResponseType(404)]
-        [ProducesResponseType(500)]
-        public async Task<IActionResult> DeletleModuleForm(int id)
-        {
-            try
-            {
-                var response = await _ModuleFormBusiness.DeletelogicaModuleFormlAsync(id);
-                return Ok(response);
-            }
-            catch (ValidationException ex)
-            {
-                _logger.LogWarning(ex, "Validación fallida al eliminar el ModuleForm con ID: {ModuleFormId}", id);
-                return BadRequest(new { message = ex.Message });
-            }
-            catch (EntityNotFoundException ex)
-            {
-                _logger.LogInformation(ex, "ModuleForm no encontrado con ID: {ModuleFormId}", id);
-                return NotFound(new { message = ex.Message });
-            }
-            catch (ExternalServiceException ex)
-            {
-                _logger.LogError(ex, "Error al eliminar el ModuleForm con ID: {ModuleFormId}", id);
-                return StatusCode(500, new { message = ex.Message });
-            }
-        }
+        //[HttpPut("logical/{id}")]
+        //[ProducesResponseType(typeof(Object), 200)]
+        //[ProducesResponseType(204)]
+        //[ProducesResponseType(400)]
+        //[ProducesResponseType(404)]
+        //[ProducesResponseType(500)]
+        //public async Task<IActionResult> DeletleModuleForm(int id)
+        //{
+        //    try
+        //    {
+        //        var response = await _ModuleFormBusiness.DeletelogicaModuleFormlAsync(id);
+        //        return Ok(response);
+        //    }
+        //    catch (ValidationException ex)
+        //    {
+        //        _logger.LogWarning(ex, "Validación fallida al eliminar el ModuleForm con ID: {ModuleFormId}", id);
+        //        return BadRequest(new { message = ex.Message });
+        //    }
+        //    catch (EntityNotFoundException ex)
+        //    {
+        //        _logger.LogInformation(ex, "ModuleForm no encontrado con ID: {ModuleFormId}", id);
+        //        return NotFound(new { message = ex.Message });
+        //    }
+        //    catch (ExternalServiceException ex)
+        //    {
+        //        _logger.LogError(ex, "Error al eliminar el ModuleForm con ID: {ModuleFormId}", id);
+        //        return StatusCode(500, new { message = ex.Message });
+        //    }
+        
 
         // DELETE => PERSISTENT
         [HttpDelete("{id}")]
@@ -165,7 +165,7 @@ namespace Web.Controllers
         {
             try
             {
-                var response = await _ModuleFormBusiness.DeletePersistenModuleFormAsync(id);
+                var response = await _ModuleFormBusiness.DeleteAsync(id);
                 return Ok(response); // Código 204: Eliminación exitosa sin contenido
             }
             catch (ValidationException ex)

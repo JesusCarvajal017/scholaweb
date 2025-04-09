@@ -84,9 +84,9 @@ CREATE TABLE `UserRol` (
 
 CREATE TABLE `RolFormPermission` (
     `Id` INT AUTO_INCREMENT NOT NULL,
-    `Form_Id` INT NOT NULL,
-    `Rol_Id` INT NOT NULL,
-    `Permision_Id` INT NOT NULL,
+    `FormId` INT NOT NULL,
+    `RolId` INT NOT NULL,
+    `PermisionId` INT NOT NULL,
 
     PRIMARY KEY (`Id`),
     FOREIGN KEY (`Form_Id`) REFERENCES `Form`(`Id`),

@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Data.factories;
+using Data.repositories.Global;
 using Entity.DTOs;
 using Entity.Model;
 using Microsoft.Extensions.Logging;
@@ -7,23 +8,22 @@ using Utilities.Exeptions;
 
 namespace Business.services
 {
-    public class UserBusiness : GenericBusiness<User, UserDto>
+    public class PermissionBusiness : GenericBusiness<Permission, PermissionDto>
     {
-        public UserBusiness(IDataFactoryGlobal factory, ILogger<User> logger, IMapper mapper) : base(factory.CreateUserData(), logger, mapper)
+        public PermissionBusiness(IDataFactoryGlobal factory, ILogger<Permission> logger, IMapper mapper) : base(factory.CreatePermissionData(), logger, mapper)
         {
 
         }
 
-        protected override void Validate(UserDto user)
+        protected override void Validate(PermissionDto form)
         {
-            if (user == null)
+            if (form == null)
                 throw new ValidationException("El formulario no puede ser nulo.");
 
-            if (string.IsNullOrWhiteSpace(user.UserName))
+            if (string.IsNullOrWhiteSpace(form.Name))
                 throw new ValidationException("El título del formulario es obligatorio.");
 
             // Agrega más validaciones si necesitas
         }
-
     }
 }

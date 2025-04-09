@@ -5,63 +5,60 @@ using System.Text;
 using System.Threading.Tasks;
 using AutoMapper;
 using Data.factories;
-using Data.repositories.Global;
 using Entity.DTOs;
 using Entity.Model;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Utilities.Exeptions;
-using static Dapper.SqlMapper;
 
 namespace Business.services
 {
-    public class RolFormPermissionBusiness : GenericBusiness<RolFormPermission, RolFormPermissionDto>
+    public class UserRolBusiness : GenericBusiness<UserRol, UserRolDto>
     {
-        public RolFormPermissionBusiness
-            (IDataFactoryGlobal factory, ILogger<RolFormPermission> logger, IMapper mapper) : base(factory.CreateRolFormPermissionData(), logger, mapper)
+        public UserRolBusiness
+            (IDataFactoryGlobal factory, ILogger<UserRol> logger, IMapper mapper) : base(factory.CreateUserRolData(), logger, mapper)
         {
 
         }
 
-        protected override void Validate(RolFormPermissionDto rolFormPermissionDto)
+        protected override void Validate(UserRolDto userRolDto)
         {
-            if (rolFormPermissionDto == null)
+            if (userRolDto == null)
                 throw new ValidationException("El formulario no puede ser nulo.");
 
-            //if (string.IsNullOrWhiteSpace(rolFormPermissionDto.Name))
+            //if (string.IsNullOrWhiteSpace(userRolDto.Name))
             //    throw new ValidationException("El título del formulario es obligatorio.");
 
             // Agrega más validaciones si necesitas
         }
 
-        protected void Validate(RolFormPermissionCreateDto rolFormPermissionDto)
+        protected void Validate(UserRolCreateDto userRolDto)
         {
-            if (rolFormPermissionDto == null)
+            if (userRolDto == null)
                 throw new ValidationException("El formulario no puede ser nulo.");
 
-            //if (string.IsNullOrWhiteSpace(rolFormPermissionDto.Name))
+            //if (string.IsNullOrWhiteSpace(userRolDto.Name))
             //    throw new ValidationException("El título del formulario es obligatorio.");
 
             // Agrega más validaciones si necesitas
         }
 
-        public async Task<RolFormPermissionCreateDto> CreateAsyncNew(RolFormPermissionCreateDto dtoExp)
+        public async Task<UserRolCreateDto> CreateAsyncNew(UserRolCreateDto dtoExp)
         {
             try
             {
                 Validate(dtoExp);
-                var entity = _mapper.Map<RolFormPermission>(dtoExp);
+                var entity = _mapper.Map<UserRol>(dtoExp);
                 var created = await _data.CreateAsyncLinq(entity);
-                return _mapper.Map<RolFormPermissionCreateDto>(entity);
+                return _mapper.Map<UserRolCreateDto>(entity);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"Error al crear el RolFormPermission {dtoExp.Id}");
+                _logger.LogError(ex, $"Error al crear el UserRol {dtoExp.Id}");
                 throw new ExternalServiceException("Base de datos", $"Error al crear {dtoExp.Id}", ex);
             }
         }
 
-        public async Task<RolFormPermissionCreateDto> UpdateNew(RolFormPermissionCreateDto dtoExp)
+        public async Task<UserRolCreateDto> UpdateNew(UserRolCreateDto dtoExp)
         {
             if (dtoExp == null)
                 throw new ValidationException("Entidad", $"{dtoExp.Id} no puede ser nulo");
@@ -74,7 +71,7 @@ namespace Business.services
                 if (dtoExp.Id == null || dtoExp.Id <= 0)
                     throw new ValidationException("Id", "El ID debe ser mayor que cero");
 
-                var entity = _mapper.Map<RolFormPermission>(dtoExp);
+                var entity = _mapper.Map<UserRol>(dtoExp);
                 var updated = await _data.UpdateAsyncLinq(entity);
 
                 if (!updated)
@@ -88,7 +85,5 @@ namespace Business.services
                 throw new ExternalServiceException("Base de datos", $"Error al actualizar {dtoExp.Id}", ex);
             }
         }
-
-
     }
 }

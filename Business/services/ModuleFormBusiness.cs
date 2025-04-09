@@ -15,53 +15,53 @@ using static Dapper.SqlMapper;
 
 namespace Business.services
 {
-    public class RolFormPermissionBusiness : GenericBusiness<RolFormPermission, RolFormPermissionDto>
+    public class ModuleFormBusiness : GenericBusiness<ModuleForm, ModuleFormDto>
     {
-        public RolFormPermissionBusiness
-            (IDataFactoryGlobal factory, ILogger<RolFormPermission> logger, IMapper mapper) : base(factory.CreateRolFormPermissionData(), logger, mapper)
+        public ModuleFormBusiness
+            (IDataFactoryGlobal factory, ILogger<ModuleForm> logger, IMapper mapper) : base(factory.CreateModuleFormData(), logger, mapper)
         {
 
         }
 
-        protected override void Validate(RolFormPermissionDto rolFormPermissionDto)
+        protected override void Validate(ModuleFormDto moduleFormDto)
         {
-            if (rolFormPermissionDto == null)
+            if (moduleFormDto == null)
                 throw new ValidationException("El formulario no puede ser nulo.");
 
-            //if (string.IsNullOrWhiteSpace(rolFormPermissionDto.Name))
+            //if (string.IsNullOrWhiteSpace(moduleFormDto.Name))
             //    throw new ValidationException("El título del formulario es obligatorio.");
 
             // Agrega más validaciones si necesitas
         }
 
-        protected void Validate(RolFormPermissionCreateDto rolFormPermissionDto)
+        protected void Validate(ModuleFormCreateDto moduleFormDto)
         {
-            if (rolFormPermissionDto == null)
+            if (moduleFormDto == null)
                 throw new ValidationException("El formulario no puede ser nulo.");
 
-            //if (string.IsNullOrWhiteSpace(rolFormPermissionDto.Name))
+            //if (string.IsNullOrWhiteSpace(moduleFormDto.Name))
             //    throw new ValidationException("El título del formulario es obligatorio.");
 
             // Agrega más validaciones si necesitas
         }
 
-        public async Task<RolFormPermissionCreateDto> CreateAsyncNew(RolFormPermissionCreateDto dtoExp)
+        public async Task<ModuleFormCreateDto> CreateAsyncNew(ModuleFormCreateDto dtoExp)
         {
             try
             {
                 Validate(dtoExp);
-                var entity = _mapper.Map<RolFormPermission>(dtoExp);
+                var entity = _mapper.Map<ModuleForm>(dtoExp);
                 var created = await _data.CreateAsyncLinq(entity);
-                return _mapper.Map<RolFormPermissionCreateDto>(entity);
+                return _mapper.Map<ModuleFormCreateDto>(entity);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"Error al crear el RolFormPermission {dtoExp.Id}");
-                throw new ExternalServiceException("Base de datos", $"Error al crear {dtoExp.Id}", ex);
+                _logger.LogError(ex, $"Error al crear el ModuleForm { dtoExp.Id }");
+                throw new ExternalServiceException("Base de datos", $"Error al crear { dtoExp.Id }", ex);
             }
         }
 
-        public async Task<RolFormPermissionCreateDto> UpdateNew(RolFormPermissionCreateDto dtoExp)
+        public async Task<ModuleFormCreateDto> UpdateNew(ModuleFormCreateDto dtoExp)
         {
             if (dtoExp == null)
                 throw new ValidationException("Entidad", $"{dtoExp.Id} no puede ser nulo");
@@ -70,11 +70,11 @@ namespace Business.services
             {
                 Validate(dtoExp);
 
-
+       
                 if (dtoExp.Id == null || dtoExp.Id <= 0)
                     throw new ValidationException("Id", "El ID debe ser mayor que cero");
 
-                var entity = _mapper.Map<RolFormPermission>(dtoExp);
+                var entity = _mapper.Map<ModuleForm>(dtoExp);
                 var updated = await _data.UpdateAsyncLinq(entity);
 
                 if (!updated)

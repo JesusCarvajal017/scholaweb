@@ -2,7 +2,6 @@
 using Entity.Model;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-
 namespace Data.repositories.Global
 {
     public class FormData : GenericData<Form>
@@ -11,6 +10,5 @@ namespace Data.repositories.Global
         {
 
         }
-
     }
 }
